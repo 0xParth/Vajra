@@ -31,3 +31,7 @@ dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
 
 [project.scripts]
 vajra = "vajra.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["vajra"]
+artifacts = ["vajra/templates/*.html"]

@@ -66,7 +66,7 @@ def _generate_html(
     file_drifts_map: dict[int, list[dict]] | None = None,
     triage_map: dict[int, list[dict]] | None = None,
 ) -> None:
-    templates_dir = Path(__file__).resolve().parent.parent / "templates"
+    templates_dir = Path(__file__).resolve().parent / "templates"
     env = Environment(loader=FileSystemLoader(str(templates_dir)), autoescape=True)
     template = env.get_template("dashboard.html")
 
