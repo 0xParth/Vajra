@@ -11,7 +11,7 @@ from rich.console import Console
 
 from vajra.config import MAX_DIFF_CHARS, TRIAGE_MODEL, anthropic_api_key
 
-_MIN_INTERVAL = 8.0  # seconds between API calls (stays under 30K tokens/min)
+_MIN_INTERVAL = 15.0  # seconds between API calls (stays under 30K tokens/min)
 _last_call_time: float = 0.0
 _triage_lock = asyncio.Lock()
 from vajra.diff import content_diff
@@ -150,7 +150,7 @@ async def triage_audit(
 
         except anthropic.APIStatusError as e:
             if e.status_code in (429, 529) and attempt < max_retries:
-                wait = 2 ** attempt
+                wait = 15 * attempt
                 console.print(
                     f"[yellow]API overloaded (attempt {attempt}/{max_retries}), "
                     f"retrying in {wait}s...[/yellow]"

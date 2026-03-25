@@ -150,6 +150,19 @@ def is_high_risk(path: str) -> bool:
     return _matches_any(path, HIGH_RISK_GLOBS)
 
 
+def is_always_critical(path: str) -> bool:
+    """Subset of high-risk files that stay CRITICAL even in mass drift.
+
+    These are direct attack vectors (.pth import hooks, native binaries,
+    setup.py build-time execution). Files like __init__.py are high-risk
+    individually, but 50 mismatched __init__.py files is packaging noise.
+    """
+    name = PurePosixPath(path).name
+    if name == "setup.py":
+        return True
+    return _matches_any(path, HIGH_RISK_GLOBS)
+
+
 def is_noise(path: str) -> bool:
     return _matches_any(path, NOISE_GLOBS)
 

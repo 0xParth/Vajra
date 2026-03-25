@@ -6,7 +6,13 @@ import difflib
 import hashlib
 from pathlib import Path
 
-from vajra.config import is_github_only_expected, is_high_risk, is_noise, is_vendored
+from vajra.config import (
+    is_always_critical,
+    is_github_only_expected,
+    is_high_risk,
+    is_noise,
+    is_vendored,
+)
 from vajra.models import (
     AuditResult,
     DriftType,
@@ -86,7 +92,7 @@ def _apply_mass_drift_heuristic(files: list[FileDrift]) -> None:
     for f in files:
         if f.severity not in (Severity.WARNING, Severity.CRITICAL):
             continue
-        if is_high_risk(f.path):
+        if is_always_critical(f.path):
             continue
         if f.severity == Severity.CRITICAL:
             f.severity = Severity.WARNING
