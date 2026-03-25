@@ -110,41 +110,49 @@ async def triage_audit(
 
     try:
         import anthropic
-
-        client = anthropic.AsyncAnthropic(api_key=api_key)
-
-        with console.status("[cyan]Running AI triage on flagged files..."):
-            response = await client.messages.create(
-                model=TRIAGE_MODEL,
-                max_tokens=2048,
-                system=SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": user_prompt}],
-            )
-
-        raw_text = response.content[0].text.strip()
-        if raw_text.startswith("```"):
-            raw_text = raw_text.split("\n", 1)[1]
-            if raw_text.endswith("```"):
-                raw_text = raw_text[:-3]
-
-        verdicts = _parse_response(raw_text, flagged)
-        return verdicts
-
     except ImportError:
         console.print("[red]anthropic package not installed. Run: pip install anthropic[/red]")
         return []
-    except Exception as e:
-        console.print(f"[red]AI triage failed: {e}[/red]")
-        return [
-            TriageVerdict(
-                file_path=f.path,
-                ai_verdict=AIVerdict.ERROR,
-                confidence=0,
-                threat_category="error",
-                explanation=f"Triage failed: {e}",
-            )
-            for f in flagged
-        ]
+
+    client = anthropic.AsyncAnthropic(api_key=api_key)
+    max_retries = 3
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            with console.status("[cyan]Running AI triage on flagged files..."):
+                response = await client.messages.create(
+                    model=TRIAGE_MODEL,
+                    max_tokens=2048,
+                    system=SYSTEM_PROMPT,
+                    messages=[{"role": "user", "content": user_prompt}],
+                )
+
+            raw_text = response.content[0].text.strip()
+            if raw_text.startswith("```"):
+                raw_text = raw_text.split("\n", 1)[1]
+                if raw_text.endswith("```"):
+                    raw_text = raw_text[:-3]
+
+            return _parse_response(raw_text, flagged)
+
+        except anthropic.APIStatusError as e:
+            if e.status_code in (429, 529) and attempt < max_retries:
+                wait = 2 ** attempt
+                console.print(
+                    f"[yellow]API overloaded (attempt {attempt}/{max_retries}), "
+                    f"retrying in {wait}s...[/yellow]"
+                )
+                import asyncio
+                await asyncio.sleep(wait)
+                continue
+            console.print(f"[red]AI triage failed: {e}[/red]")
+            return _fallback_verdicts(flagged, f"Triage failed: {e}")
+
+        except Exception as e:
+            console.print(f"[red]AI triage failed: {e}[/red]")
+            return _fallback_verdicts(flagged, f"Triage failed: {e}")
+
+    return _fallback_verdicts(flagged, "Triage failed after retries")
 
 
 def _parse_response(
