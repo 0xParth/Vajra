@@ -103,6 +103,12 @@ tr.clickable:hover { background: var(--surface2); }
 .badge.malicious { background: var(--red-bg); color: var(--red); }
 .badge.suspicious { background: var(--yellow-bg); color: var(--yellow); }
 .badge.benign { background: var(--green-bg); color: var(--green); }
+.badge-drift {
+  display: inline-block; padding: 0.1rem 0.45rem; border-radius: 3px;
+  font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
+  background: rgba(99,179,237,0.1); color: var(--accent); margin-left: 0.3rem;
+  vertical-align: middle; cursor: help;
+}
 
 /* Detail row */
 .detail-row { display: none; }
@@ -209,7 +215,12 @@ footer a:hover { color: var(--accent); }
       <tr class="clickable" tabindex="0" onclick="toggleDetail('detail-{{ s.id }}', this)" onkeydown="if(event.key==='Enter')this.click()">
         <td class="mono">{{ s.package }}</td>
         <td class="mono">{{ s.version }}</td>
-        <td><span class="badge {{ s.verdict|lower }}">{{ s.verdict }}</span></td>
+        <td>
+          <span class="badge {{ s.verdict|lower }}">{{ s.verdict }}</span>
+          {% if s.id in mass_drift_ids %}
+          <span class="badge-drift" title="High drift count — likely packaging differences, not an attack">structural mismatch</span>
+          {% endif %}
+        </td>
         <td>{{ s.critical }}</td>
         <td>{{ s.warnings }}</td>
         <td>{% if s.github_repo %}<a href="https://github.com/{{ s.github_repo }}" onclick="event.stopPropagation()">{{ s.github_repo }}</a>{% else %}&mdash;{% endif %}</td>

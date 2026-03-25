@@ -95,6 +95,17 @@ GITHUB_ONLY_GLOBS: list[str] = [
     "AUTHORS.rst",
 ]
 
+VENDORED_GLOBS: list[str] = [
+    "_vendor/*",
+    "_vendor/**/*",
+    "vendor/*",
+    "vendor/**/*",
+    "_bundled/*",
+    "_bundled/**/*",
+    "third_party/*",
+    "third_party/**/*",
+]
+
 FILE_COUNT_DELTA_THRESHOLD = 0.20  # 20% change flags a warning in recon mode
 
 DEFAULT_VERSION_SCAN_COUNT = 5
@@ -141,6 +152,10 @@ def is_high_risk(path: str) -> bool:
 
 def is_noise(path: str) -> bool:
     return _matches_any(path, NOISE_GLOBS)
+
+
+def is_vendored(path: str) -> bool:
+    return _matches_any(path, VENDORED_GLOBS)
 
 
 def is_github_only_expected(path: str) -> bool:

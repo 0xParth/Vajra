@@ -6,7 +6,7 @@ import difflib
 import hashlib
 from pathlib import Path
 
-from vajra.config import is_github_only_expected, is_high_risk, is_noise
+from vajra.config import is_github_only_expected, is_high_risk, is_noise, is_vendored
 from vajra.models import (
     AuditResult,
     DriftType,
@@ -35,6 +35,9 @@ def normalize_tree(root: Path) -> dict[str, str]:
     return tree
 
 
+_MASS_DRIFT_THRESHOLD = 15
+
+
 def _classify(path: str, drift_type: DriftType) -> Severity:
     """Assign severity based on file classification and drift type."""
     if drift_type == DriftType.MATCH:
@@ -42,6 +45,8 @@ def _classify(path: str, drift_type: DriftType) -> Severity:
 
     if drift_type == DriftType.PYPI_ONLY:
         if is_noise(path):
+            return Severity.INFO
+        if is_vendored(path):
             return Severity.INFO
         if is_high_risk(path):
             return Severity.CRITICAL
@@ -57,11 +62,36 @@ def _classify(path: str, drift_type: DriftType) -> Severity:
             return Severity.INFO
         if is_high_risk(path):
             return Severity.CRITICAL
-        if path.endswith(".py"):
-            return Severity.CRITICAL
         return Severity.WARNING
 
     return Severity.WARNING
+
+
+def _apply_mass_drift_heuristic(files: list[FileDrift]) -> None:
+    """Downgrade non-high-risk CRITICALs and tag WARNINGs when drift is
+    too widespread.
+
+    Real supply chain attacks are surgical (1-5 files). When dozens of
+    files drift it is almost always a packaging / vendoring mismatch.
+    High-risk files (.pth, .so, setup.py, __init__.py) keep their
+    severity regardless.
+    """
+    actionable = [
+        f for f in files
+        if f.severity in (Severity.WARNING, Severity.CRITICAL)
+    ]
+    if len(actionable) <= _MASS_DRIFT_THRESHOLD:
+        return
+
+    for f in files:
+        if f.severity not in (Severity.WARNING, Severity.CRITICAL):
+            continue
+        if is_high_risk(f.path):
+            continue
+        if f.severity == Severity.CRITICAL:
+            f.severity = Severity.WARNING
+        if not f.detail.startswith("[mass-drift]"):
+            f.detail = f"[mass-drift] {f.detail}"
 
 
 def run_audit(
@@ -145,6 +175,8 @@ def run_audit(
                 detail=f"No GitHub tag/release found for version {version}",
             ),
         )
+
+    _apply_mass_drift_heuristic(files)
 
     verdict = _compute_verdict(files, github_tag_exists)
 

@@ -46,9 +46,14 @@ def generate_dashboard(
             entry["package"] = f"{s['package']}=={s['version']}"
             triage_entries.append(entry)
 
+    mass_drift_ids: set[int] = set()
+    for sid, drifts in file_drifts_map.items():
+        if any(d.get("detail", "").startswith("[mass-drift]") for d in drifts):
+            mass_drift_ids.add(sid)
+
     _generate_html(
         out, stats, flagged, triage_entries, recent_clean,
-        file_drifts_map, triage_map,
+        file_drifts_map, triage_map, mass_drift_ids,
     )
     _generate_json_feed(out, store)
     _generate_rss_feed(out, stats, flagged)
@@ -65,6 +70,7 @@ def _generate_html(
     recent_clean: list[dict],
     file_drifts_map: dict[int, list[dict]] | None = None,
     triage_map: dict[int, list[dict]] | None = None,
+    mass_drift_ids: set[int] | None = None,
 ) -> None:
     templates_dir = Path(__file__).resolve().parent / "templates"
     env = Environment(loader=FileSystemLoader(str(templates_dir)), autoescape=True)
@@ -78,6 +84,7 @@ def _generate_html(
         recent_clean=recent_clean,
         file_drifts_map=file_drifts_map or {},
         triage_map=triage_map or {},
+        mass_drift_ids=mass_drift_ids or set(),
     )
     (out / "index.html").write_text(html)
 

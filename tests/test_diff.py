@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import tempfile
 from pathlib import Path
 
-from vajra.config import is_high_risk, is_noise, is_github_only_expected
+from vajra.config import is_high_risk, is_noise, is_github_only_expected, is_vendored
 from vajra.diff import compute_sha256, normalize_tree, run_audit
 from vajra.models import DriftType, Severity, Verdict
 
@@ -146,7 +147,7 @@ class TestMaliciousAudit:
         ]
         assert len(proxy_files) == 1
         assert proxy_files[0].drift_type == DriftType.CONTENT_MISMATCH
-        assert proxy_files[0].severity == Severity.CRITICAL
+        assert proxy_files[0].severity == Severity.WARNING
 
     def test_init_py_matches(self):
         result = self._run()
@@ -167,7 +168,128 @@ class TestMaliciousAudit:
 
     def test_critical_count(self):
         result = self._run()
-        assert result.critical_count >= 2
+        assert result.critical_count >= 1
+
+
+class TestVendoredDetection:
+    def test_vendor_dir_is_vendored(self):
+        assert is_vendored("_vendor/six.py")
+
+    def test_vendor_nested_is_vendored(self):
+        assert is_vendored("vendor/requests/models.py")
+
+    def test_third_party_is_vendored(self):
+        assert is_vendored("third_party/chardet/__init__.py")
+
+    def test_regular_file_not_vendored(self):
+        assert not is_vendored("litellm/utils.py")
+
+
+class TestMassDrift:
+    """When many files drift, non-high-risk CRITICALs are downgraded."""
+
+    @staticmethod
+    def _fake_hash(content: str) -> str:
+        return hashlib.sha256(content.encode()).hexdigest()
+
+    def test_mass_drift_downgrades_non_high_risk(self):
+        pypi_tree = {}
+        github_tree = {}
+        for i in range(30):
+            path = f"pkg/module_{i}.py"
+            pypi_tree[path] = self._fake_hash(f"pypi-{i}")
+            github_tree[path] = self._fake_hash(f"github-{i}")
+
+        pypi_tree["setup.py"] = self._fake_hash("pypi-setup")
+        github_tree["setup.py"] = self._fake_hash("github-setup")
+
+        pypi_tree["evil.pth"] = self._fake_hash("import evil")
+
+        result = run_audit(
+            pypi_tree, github_tree,
+            package="fakepkg", version="1.0.0",
+        )
+
+        pth = [f for f in result.files if f.path == "evil.pth"]
+        assert pth[0].severity == Severity.CRITICAL
+
+        setup = [f for f in result.files if f.path == "setup.py"]
+        assert setup[0].severity == Severity.CRITICAL
+
+        regular_py = [
+            f for f in result.files
+            if f.path.startswith("pkg/module_") and f.drift_type == DriftType.CONTENT_MISMATCH
+        ]
+        assert len(regular_py) == 30
+        for f in regular_py:
+            assert f.severity == Severity.WARNING
+            assert f.detail.startswith("[mass-drift]")
+
+    def test_small_drift_keeps_severity(self):
+        pypi_tree = {
+            "pkg/a.py": self._fake_hash("pypi-a"),
+            "setup.py": self._fake_hash("pypi-setup"),
+        }
+        github_tree = {
+            "pkg/a.py": self._fake_hash("github-a"),
+            "setup.py": self._fake_hash("github-setup"),
+        }
+        result = run_audit(
+            pypi_tree, github_tree,
+            package="smallpkg", version="1.0.0",
+        )
+
+        setup = [f for f in result.files if f.path == "setup.py"]
+        assert setup[0].severity == Severity.CRITICAL
+
+        no_mass = [f for f in result.files if "[mass-drift]" in f.detail]
+        assert len(no_mass) == 0
+
+    def test_has_mass_drift_property(self):
+        pypi_tree = {}
+        github_tree = {}
+        for i in range(20):
+            path = f"pkg/mod_{i}.py"
+            pypi_tree[path] = self._fake_hash(f"a{i}")
+            github_tree[path] = self._fake_hash(f"b{i}")
+
+        result = run_audit(
+            pypi_tree, github_tree,
+            package="massdrift", version="2.0.0",
+        )
+        assert result.has_mass_drift is True
+
+    def test_overlap_match_ratio(self):
+        pypi_tree = {
+            "a.py": self._fake_hash("same"),
+            "b.py": self._fake_hash("same"),
+            "c.py": self._fake_hash("pypi-c"),
+        }
+        github_tree = {
+            "a.py": self._fake_hash("same"),
+            "b.py": self._fake_hash("same"),
+            "c.py": self._fake_hash("github-c"),
+        }
+        result = run_audit(
+            pypi_tree, github_tree,
+            package="ratiodemo", version="1.0.0",
+        )
+        assert abs(result.overlap_match_ratio - 2 / 3) < 0.01
+
+    def test_vendored_pypi_only_is_info(self):
+        pypi_tree = {
+            "_vendor/six.py": self._fake_hash("vendored"),
+            "pkg/__init__.py": self._fake_hash("init"),
+        }
+        github_tree = {
+            "pkg/__init__.py": self._fake_hash("init"),
+        }
+        result = run_audit(
+            pypi_tree, github_tree,
+            package="vendordemo", version="1.0.0",
+        )
+        vendored = [f for f in result.files if f.path == "_vendor/six.py"]
+        assert vendored[0].severity == Severity.INFO
 
 
 class TestNoGitHubTag:

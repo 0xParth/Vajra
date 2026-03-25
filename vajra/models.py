@@ -61,6 +61,22 @@ class AuditResult:
     def ok_count(self) -> int:
         return sum(1 for f in self.files if f.severity == Severity.OK)
 
+    @property
+    def overlap_match_ratio(self) -> float:
+        """Fraction of common files (present in both trees) that match."""
+        common = [
+            f for f in self.files
+            if f.drift_type in (DriftType.MATCH, DriftType.CONTENT_MISMATCH)
+        ]
+        if not common:
+            return 0.0
+        matched = sum(1 for f in common if f.drift_type == DriftType.MATCH)
+        return matched / len(common)
+
+    @property
+    def has_mass_drift(self) -> bool:
+        return any(f.detail.startswith("[mass-drift]") for f in self.files)
+
 
 @dataclass
 class MaintainerInfo:
