@@ -155,7 +155,6 @@ async def triage_audit(
                     f"[yellow]API overloaded (attempt {attempt}/{max_retries}), "
                     f"retrying in {wait}s...[/yellow]"
                 )
-                import asyncio
                 await asyncio.sleep(wait)
                 continue
             console.print(f"[red]AI triage failed: {e}[/red]")
