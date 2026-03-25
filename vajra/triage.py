@@ -12,6 +12,7 @@ from rich.console import Console
 from vajra.config import MAX_DIFF_CHARS, TRIAGE_MODEL, anthropic_api_key
 
 _MIN_INTERVAL = 15.0  # seconds between API calls (stays under 30K tokens/min)
+_MAX_TRIAGE_FILES = 10  # cap files sent to AI per package
 _last_call_time: float = 0.0
 _triage_lock = asyncio.Lock()
 from vajra.diff import content_diff
@@ -96,10 +97,17 @@ async def triage_audit(
         )
         return []
 
+    if result.has_mass_drift:
+        console.print("[dim]Skipping AI triage — mass drift (packaging noise).[/dim]")
+        return []
+
     flagged = [f for f in result.files if _needs_triage(f)]
     if not flagged:
         console.print("[green]No files require AI triage.[/green]")
         return []
+
+    flagged.sort(key=lambda f: f.severity != Severity.CRITICAL)
+    flagged = flagged[:_MAX_TRIAGE_FILES]
 
     file_analyses: list[dict[str, str]] = []
     for f in flagged:
