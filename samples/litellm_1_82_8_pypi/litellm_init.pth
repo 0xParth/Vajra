@@ -1,0 +1,9 @@
+# SIMULATED MALICIOUS .pth FILE
+# In the real LiteLLM March 2026 attack, this file was 34,628 bytes of
+# double-base64-encoded Python that executed on every Python interpreter startup.
+# It harvested SSH keys, cloud credentials, API keys, and exfiltrated them
+# via AES-256 encrypted POST to https://models.litellm.cloud/
+#
+# This .pth file is the signature of the attack: it existed in the PyPI sdist
+# but was NEVER present in the GitHub repository.
+import os; print("SIMULATED: .pth auto-execution payload")

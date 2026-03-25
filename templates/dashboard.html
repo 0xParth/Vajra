@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vajra — Supply Chain Drift Monitor</title>
+<meta name="description" content="Automated source-to-artifact drift detection for PyPI packages. Zero-trust supply chain security.">
+<style>
+:root {
+  --bg: #0a0e14; --surface: #12171f; --surface2: #1a2030;
+  --border: #252d3a; --border-light: #2d3748;
+  --text: #e2e8f0; --muted: #718096; --dim: #4a5568;
+  --accent: #63b3ed; --accent2: #4fd1c5;
+  --green: #48bb78; --green-bg: rgba(72,187,120,0.1);
+  --yellow: #ecc94b; --yellow-bg: rgba(236,201,75,0.1);
+  --red: #fc8181; --red-bg: rgba(252,129,129,0.1);
+  --purple: #b794f4;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Layout */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+header { padding: 2.5rem 0 1.5rem; border-bottom: 1px solid var(--border); }
+.header-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+.brand { display: flex; align-items: center; gap: 0.75rem; }
+.brand h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; }
+.brand h1 span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.brand-tag { color: var(--muted); font-size: 0.85rem; margin-top: 0.2rem; }
+.header-meta { text-align: right; color: var(--muted); font-size: 0.8rem; }
+.header-meta a { color: var(--accent); text-decoration: none; }
+.header-meta a:hover { text-decoration: underline; }
+
+/* Stats row */
+.stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin: 2rem 0; }
+@media (max-width: 768px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+.stat {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1.2rem; position: relative; overflow: hidden;
+}
+.stat::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.stat.green::before { background: var(--green); }
+.stat.yellow::before { background: var(--yellow); }
+.stat.red::before { background: var(--red); }
+.stat.blue::before { background: var(--accent); }
+.stat.purple::before { background: var(--purple); }
+.stat .num { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+.stat .label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.3rem; }
+.stat.green .num { color: var(--green); }
+.stat.yellow .num { color: var(--yellow); }
+.stat.red .num { color: var(--red); }
+.stat.blue .num { color: var(--accent); }
+.stat.purple .num { color: var(--purple); }
+
+/* Section */
+section { margin: 2rem 0; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+.section-header h2 { font-size: 1.15rem; font-weight: 700; }
+
+/* Search */
+.search-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+  padding: 0.4rem 0.8rem; color: var(--text); font-size: 0.85rem; width: 220px;
+  outline: none; transition: border-color 0.2s;
+}
+.search-box:focus { border-color: var(--accent); }
+.search-box::placeholder { color: var(--dim); }
+
+/* Tables */
+table {
+  width: 100%; border-collapse: collapse; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  font-size: 0.9rem;
+}
+th {
+  background: var(--surface2); color: var(--muted); font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+  padding: 0.7rem 0.9rem; text-align: left; cursor: pointer; user-select: none;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+th:hover { color: var(--text); }
+th .arrow { font-size: 0.65rem; margin-left: 0.3rem; opacity: 0.4; }
+th.sorted .arrow { opacity: 1; color: var(--accent); }
+td { padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr.clickable { cursor: pointer; transition: background 0.15s; }
+tr.clickable:hover { background: var(--surface2); }
+
+/* Badges */
+.badge {
+  display: inline-block; padding: 0.15rem 0.55rem; border-radius: 4px;
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.badge.clean { background: var(--green-bg); color: var(--green); }
+.badge.warn { background: var(--yellow-bg); color: var(--yellow); }
+.badge.critical { background: var(--red-bg); color: var(--red); }
+.badge.malicious { background: var(--red-bg); color: var(--red); }
+.badge.suspicious { background: var(--yellow-bg); color: var(--yellow); }
+.badge.benign { background: var(--green-bg); color: var(--green); }
+
+/* Detail row */
+.detail-row { display: none; }
+.detail-row.open { display: table-row; }
+.detail-row td {
+  background: var(--surface2); padding: 1rem 1.5rem;
+  border-left: 3px solid var(--accent);
+}
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
+.detail-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; }
+.detail-card h4 { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; margin-bottom: 0.4rem; }
+.detail-list { list-style: none; }
+.detail-list li { padding: 0.25rem 0; font-size: 0.85rem; display: flex; justify-content: space-between; }
+.detail-list li + li { border-top: 1px solid var(--border); }
+
+/* Mono */
+.mono { font-family: 'SF Mono', 'Fira Code', Consolas, monospace; font-size: 0.82rem; }
+
+/* Footer */
+footer {
+  margin-top: 3rem; padding: 2rem 0; border-top: 1px solid var(--border);
+  text-align: center; color: var(--dim); font-size: 0.8rem;
+}
+footer a { color: var(--muted); text-decoration: none; margin: 0 0.5rem; }
+footer a:hover { color: var(--accent); }
+
+/* Empty state */
+.empty { text-align: center; padding: 3rem; color: var(--muted); }
+.empty p { font-size: 0.95rem; }
+
+/* Pill nav */
+.pills { display: flex; gap: 0.4rem; }
+.pill {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+  padding: 0.3rem 0.7rem; font-size: 0.78rem; color: var(--muted); cursor: pointer;
+  transition: all 0.15s; user-select: none;
+}
+.pill:hover { border-color: var(--accent); color: var(--text); }
+.pill.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="header-row">
+    <div>
+      <div class="brand">
+        <h1><span>Vajra</span></h1>
+      </div>
+      <div class="brand-tag">Supply Chain Drift Monitor for PyPI</div>
+    </div>
+    <div class="header-meta">
+      Last scan: {{ last_scan[:16] if last_scan else "never" }}<br>
+      <a href="feed.json">JSON Feed</a> &middot; <a href="feed.xml">RSS</a>
+    </div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat blue">
+    <div class="num">{{ stats.total_scans }}</div>
+    <div class="label">Packages Scanned</div>
+  </div>
+  <div class="stat green">
+    <div class="num">{{ stats.clean }}</div>
+    <div class="label">Clean</div>
+  </div>
+  <div class="stat yellow">
+    <div class="num">{{ stats.warnings }}</div>
+    <div class="label">Warnings</div>
+  </div>
+  <div class="stat red">
+    <div class="num">{{ stats.critical }}</div>
+    <div class="label">Critical Drift</div>
+  </div>
+  <div class="stat purple">
+    <div class="num">{{ stats.confirmed_threats }}</div>
+    <div class="label">AI Confirmed</div>
+  </div>
+</div>
+
+{% if flagged %}
+<section id="sec-flagged">
+  <div class="section-header">
+    <h2>Flagged Packages</h2>
+    <input type="text" class="search-box" id="flaggedSearch" placeholder="Filter packages..." oninput="filterTable('flaggedTable', this.value)">
+  </div>
+  <table id="flaggedTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable('flaggedTable',0)">Package <span class="arrow">&#9650;</span></th>
+        <th onclick="sortTable('flaggedTable',1)">Version <span class="arrow">&#9650;</span></th>
+        <th onclick="sortTable('flaggedTable',2)">Verdict <span class="arrow">&#9650;</span></th>
+        <th onclick="sortTable('flaggedTable',3)">Critical <span class="arrow">&#9650;</span></th>
+        <th onclick="sortTable('flaggedTable',4)">Warnings <span class="arrow">&#9650;</span></th>
+        <th onclick="sortTable('flaggedTable',5)">Repo <span class="arrow">&#9650;</span></th>
+        <th onclick="sortTable('flaggedTable',6)">Scanned <span class="arrow">&#9650;</span></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for s in flagged %}
+      <tr class="clickable" tabindex="0" onclick="toggleDetail('detail-{{ s.id }}', this)" onkeydown="if(event.key==='Enter')this.click()">
+        <td class="mono">{{ s.package }}</td>
+        <td class="mono">{{ s.version }}</td>
+        <td><span class="badge {{ s.verdict|lower }}">{{ s.verdict }}</span></td>
+        <td>{{ s.critical }}</td>
+        <td>{{ s.warnings }}</td>
+        <td>{% if s.github_repo %}<a href="https://github.com/{{ s.github_repo }}" onclick="event.stopPropagation()">{{ s.github_repo }}</a>{% else %}&mdash;{% endif %}</td>
+        <td style="color:var(--muted)">{{ s.timestamp[:16] }}</td>
+      </tr>
+      <tr class="detail-row" id="detail-{{ s.id }}">
+        <td colspan="7">
+          {% set drifts = file_drifts_map.get(s.id, []) %}
+          {% set triages = triage_map.get(s.id, []) %}
+          <div class="detail-grid">
+            {% if drifts %}
+            <div class="detail-card">
+              <h4>File Drifts</h4>
+              <ul class="detail-list">
+              {% for d in drifts %}
+                <li>
+                  <span class="mono">{{ d.path }}</span>
+                  <span class="badge {{ 'critical' if d.severity == 'CRITICAL' else ('warn' if d.severity == 'WARNING' else 'clean') }}">{{ d.drift_type }}</span>
+                </li>
+              {% endfor %}
+              </ul>
+            </div>
+            {% endif %}
+            {% if triages %}
+            <div class="detail-card">
+              <h4>AI Triage</h4>
+              <ul class="detail-list">
+              {% for t in triages %}
+                <li>
+                  <span class="mono">{{ t.file_path }}</span>
+                  <span class="badge {{ t.ai_verdict }}">{{ t.ai_verdict }} ({{ t.confidence }}%)</span>
+                </li>
+                <li style="color:var(--muted); font-size:0.8rem; border-top:none; padding-top:0">{{ t.explanation }}</li>
+              {% endfor %}
+              </ul>
+            </div>
+            {% endif %}
+            {% if not drifts and not triages %}
+            <div class="detail-card"><h4>Details</h4><p style="color:var(--muted); font-size:0.85rem">No detailed data available.</p></div>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{% if triage_entries %}
+<section id="sec-triage">
+  <div class="section-header">
+    <h2>AI Triage Results</h2>
+    <div class="pills">
+      <span class="pill active" role="button" tabindex="0" onclick="filterTriage('all', this)" onkeydown="if(event.key==='Enter')this.click()">All</span>
+      <span class="pill" role="button" tabindex="0" onclick="filterTriage('malicious', this)" onkeydown="if(event.key==='Enter')this.click()">Malicious</span>
+      <span class="pill" role="button" tabindex="0" onclick="filterTriage('suspicious', this)" onkeydown="if(event.key==='Enter')this.click()">Suspicious</span>
+      <span class="pill" role="button" tabindex="0" onclick="filterTriage('benign', this)" onkeydown="if(event.key==='Enter')this.click()">Benign</span>
+    </div>
+  </div>
+  <table id="triageTable">
+    <thead>
+      <tr>
+        <th>Package</th>
+        <th>File</th>
+        <th>AI Verdict</th>
+        <th>Confidence</th>
+        <th>Category</th>
+        <th>Explanation</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for entry in triage_entries %}
+      <tr data-verdict="{{ entry.ai_verdict }}">
+        <td class="mono">{{ entry.package }}</td>
+        <td class="mono">{{ entry.file_path }}</td>
+        <td><span class="badge {{ entry.ai_verdict }}">{{ entry.ai_verdict }}</span></td>
+        <td>{{ entry.confidence }}%</td>
+        <td>{{ entry.threat_category }}</td>
+        <td style="color:var(--muted); font-size:0.85rem">{{ entry.explanation }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+<section id="sec-clean">
+  <div class="section-header">
+    <h2>Recent Clean Scans</h2>
+    <input type="text" class="search-box" id="cleanSearch" placeholder="Filter..." oninput="filterTable('cleanTable', this.value)">
+  </div>
+  {% if recent_clean %}
+  <table id="cleanTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable('cleanTable',0)">Package <span class="arrow">&#9650;</span></th>
+        <th onclick="sortTable('cleanTable',1)">Version <span class="arrow">&#9650;</span></th>
+        <th>Verdict</th>
+        <th onclick="sortTable('cleanTable',3)">Files <span class="arrow">&#9650;</span></th>
+        <th onclick="sortTable('cleanTable',4)">Scanned <span class="arrow">&#9650;</span></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for s in recent_clean[:30] %}
+      <tr>
+        <td class="mono">{{ s.package }}</td>
+        <td class="mono">{{ s.version }}</td>
+        <td><span class="badge clean">CLEAN</span></td>
+        <td>{{ s.pypi_files }}</td>
+        <td style="color:var(--muted)">{{ s.timestamp[:16] }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty"><p>No clean scans yet. Run <code>vajra watch</code> to start scanning.</p></div>
+  {% endif %}
+</section>
+
+</div>
+
+<footer>
+  <p>Vajra &mdash; Zero-trust source-to-artifact drift detection. No signatures, just math.</p>
+  <div style="margin-top:0.5rem">
+    <a href="feed.json">JSON Feed</a>
+    <a href="feed.xml">RSS Feed</a>
+    <a href="https://github.com/vajra">GitHub</a>
+  </div>
+</footer>
+
+<script>
+function filterTable(tableId, query) {
+  const rows = document.querySelectorAll('#' + tableId + ' tbody tr:not(.detail-row)');
+  const q = query.toLowerCase();
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const show = text.includes(q);
+    row.style.display = show ? '' : 'none';
+    const next = row.nextElementSibling;
+    if (next && next.classList.contains('detail-row')) {
+      next.style.display = 'none';
+      next.classList.remove('open');
+    }
+  });
+}
+
+function sortTable(tableId, colIdx) {
+  const table = document.getElementById(tableId);
+  const tbody = table.querySelector('tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr:not(.detail-row)'));
+  const th = table.querySelectorAll('th')[colIdx];
+  const asc = !th.classList.contains('sorted') || th.dataset.dir === 'desc';
+
+  table.querySelectorAll('th').forEach(h => { h.classList.remove('sorted'); delete h.dataset.dir; });
+  th.classList.add('sorted');
+  th.dataset.dir = asc ? 'asc' : 'desc';
+  th.querySelector('.arrow').textContent = asc ? '\u25B2' : '\u25BC';
+
+  rows.sort((a, b) => {
+    let va = a.children[colIdx]?.textContent.trim() || '';
+    let vb = b.children[colIdx]?.textContent.trim() || '';
+    const na = Number.parseFloat(va), nb = Number.parseFloat(vb);
+    if (!Number.isNaN(na) && !Number.isNaN(nb)) return asc ? na - nb : nb - na;
+    return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+
+  rows.forEach(row => {
+    const detail = row.nextElementSibling;
+    tbody.appendChild(row);
+    if (detail && detail.classList.contains('detail-row')) tbody.appendChild(detail);
+  });
+}
+
+function toggleDetail(id, clickedRow) {
+  const row = document.getElementById(id);
+  if (row) {
+    row.classList.toggle('open');
+    row.style.display = row.classList.contains('open') ? 'table-row' : 'none';
+  }
+}
+
+function filterTriage(verdict, pill) {
+  document.querySelectorAll('#sec-triage .pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  document.querySelectorAll('#triageTable tbody tr').forEach(row => {
+    if (verdict === 'all') { row.style.display = ''; return; }
+    row.style.display = row.dataset.verdict === verdict ? '' : 'none';
+  });
+}
+</script>
+
+</body>
+</html>

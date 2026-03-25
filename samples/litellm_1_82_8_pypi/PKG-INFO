@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: litellm
+Version: 1.82.8
+Summary: Library to call 100+ LLM APIs using the OpenAI format.
+Home-page: https://github.com/BerriAI/litellm
+Author: BerriAI

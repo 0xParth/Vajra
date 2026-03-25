@@ -1,0 +1,63 @@
+name: Vajra Scan
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:        # Manual trigger
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: vajra-scan
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Vajra
+        run: pip install .
+
+      - name: Restore scan database
+        uses: actions/cache@v4
+        with:
+          path: ~/.vajra/vajra.db
+          key: vajra-db-${{ github.run_number }}
+          restore-keys: vajra-db-
+
+      - name: Run scan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          vajra watch \
+            --top 100 \
+            --include-ai \
+            ${{ secrets.ANTHROPIC_API_KEY && '--triage' || '' }} \
+            --dashboard \
+            --output ./public
+
+      - name: Upload dashboard artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+  deploy:
+    needs: scan
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
