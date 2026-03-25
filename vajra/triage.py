@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
+import time
 from pathlib import Path
 
 from rich.console import Console
 
 from vajra.config import MAX_DIFF_CHARS, TRIAGE_MODEL, anthropic_api_key
+
+_MIN_INTERVAL = 8.0  # seconds between API calls (stays under 30K tokens/min)
+_last_call_time: float = 0.0
+_triage_lock = asyncio.Lock()
 from vajra.diff import content_diff
 from vajra.models import (
     AIVerdict,
@@ -119,6 +125,13 @@ async def triage_audit(
 
     for attempt in range(1, max_retries + 1):
         try:
+            global _last_call_time
+            async with _triage_lock:
+                elapsed = time.monotonic() - _last_call_time
+                if elapsed < _MIN_INTERVAL:
+                    await asyncio.sleep(_MIN_INTERVAL - elapsed)
+                _last_call_time = time.monotonic()
+
             with console.status("[cyan]Running AI triage on flagged files..."):
                 response = await client.messages.create(
                     model=TRIAGE_MODEL,
