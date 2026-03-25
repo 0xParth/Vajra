@@ -26,8 +26,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .mono{font-family:'JetBrains Mono',monospace;font-size:0.82em}
 a{color:var(--accent);text-decoration:none}
 a:hover{text-decoration:underline}
-
-/* Container */
 .wrap{max-width:1240px;margin:0 auto;padding:0 1.5rem}
 
 /* ── Hero ───────────────────────────────────────────────────────── */
@@ -39,7 +37,7 @@ a:hover{text-decoration:underline}
 .hero-text h1 .grad{background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hero-text p{color:var(--muted);font-size:1.05rem;max-width:520px;margin-bottom:0.75rem}
 .hero-text .tagline{display:inline-flex;align-items:center;gap:0.5rem;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:0.3rem 0.9rem;font-size:0.78rem;color:var(--dim);margin-bottom:1rem}
-.hero-text .tagline .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.hero-text .tagline .dot{width:6px;height:6px;border-radius:50%;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 .hero-meta{text-align:right;color:var(--dim);font-size:0.8rem}
 .hero-meta strong{color:var(--muted)}
@@ -48,8 +46,26 @@ a:hover{text-decoration:underline}
 .hero-links a:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
 .hero-links a svg{width:14px;height:14px}
 
+/* ── Status Banner ──────────────────────────────────────────────── */
+.banner{border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;gap:1rem}
+.banner svg{width:28px;height:28px;flex-shrink:0}
+.banner-text h3{font-size:1rem;font-weight:700}
+.banner-text p{font-size:0.85rem;margin-top:0.1rem}
+.banner.all-clear{background:var(--green-bg);border:1px solid var(--green-border)}
+.banner.all-clear svg{stroke:var(--green)}
+.banner.all-clear h3{color:var(--green)}
+.banner.all-clear p{color:var(--muted)}
+.banner.has-threats{background:var(--red-bg);border:1px solid var(--red-border)}
+.banner.has-threats svg{stroke:var(--red)}
+.banner.has-threats h3{color:var(--red)}
+.banner.has-threats p{color:var(--muted)}
+.banner.warn-only{background:var(--yellow-bg);border:1px solid var(--yellow-border)}
+.banner.warn-only svg{stroke:var(--yellow)}
+.banner.warn-only h3{color:var(--yellow)}
+.banner.warn-only p{color:var(--muted)}
+
 /* ── Stats ──────────────────────────────────────────────────────── */
-.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:2.5rem}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:2rem}
 @media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1rem;position:relative;overflow:hidden;transition:border-color 0.2s,transform 0.2s}
@@ -79,14 +95,7 @@ section{margin-bottom:2.5rem}
 .pill:hover{border-color:var(--border2);color:var(--muted)}
 .pill.active{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
 
-/* ── Finding cards ──────────────────────────────────────────────── */
-.findings{display:flex;flex-direction:column;gap:0.5rem}
-.finding{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;transition:border-color 0.2s;cursor:pointer}
-.finding:hover{border-color:var(--border2)}
-.finding-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-.finding-pkg{display:flex;align-items:center;gap:0.75rem}
-.finding-pkg .name{font-weight:700;font-size:0.95rem}
-.finding-pkg .ver{color:var(--dim);font-size:0.82rem}
+/* ── Badges ─────────────────────────────────────────────────────── */
 .badge{display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
 .badge::before{content:'';width:5px;height:5px;border-radius:50%}
 .badge.critical{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}.badge.critical::before{background:var(--red)}
@@ -95,10 +104,21 @@ section{margin-bottom:2.5rem}
 .badge.malicious{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}.badge.malicious::before{background:var(--red)}
 .badge.suspicious{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border)}.badge.suspicious::before{background:var(--yellow)}
 .badge.benign{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}.badge.benign::before{background:var(--green)}
-.badge-drift{background:rgba(56,189,248,0.08);color:var(--accent);border:1px solid rgba(56,189,248,0.2);font-size:0.6rem;padding:0.15rem 0.5rem;border-radius:20px;font-weight:600;text-transform:uppercase;letter-spacing:0.03em;cursor:help}
+
+/* ── Threat cards ───────────────────────────────────────────────── */
+.findings{display:flex;flex-direction:column;gap:0.5rem}
+.finding{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;transition:border-color 0.2s;cursor:pointer}
+.finding:hover{border-color:var(--border2)}
+.finding-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.finding-pkg{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap}
+.finding-pkg .name{font-weight:700;font-size:0.95rem}
+.finding-pkg .ver{color:var(--dim);font-size:0.82rem}
 .finding-stats{display:flex;align-items:center;gap:1.25rem;color:var(--dim);font-size:0.78rem}
 .finding-stats span{display:flex;align-items:center;gap:0.3rem}
-.finding-repo{color:var(--faint);font-size:0.78rem;margin-top:0.4rem}
+.finding-reasons{margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.35rem}
+.reason-tag{display:inline-flex;align-items:center;gap:0.25rem;background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);border-radius:var(--radius-xs);padding:0.2rem 0.6rem;font-size:0.72rem;font-weight:600}
+.reason-tag.low{background:var(--yellow-bg);border-color:var(--yellow-border);color:var(--yellow)}
+.finding-repo{color:var(--faint);font-size:0.78rem;margin-top:0.3rem}
 .finding-repo a{color:var(--dim)}
 
 /* Finding detail */
@@ -114,14 +134,30 @@ section{margin-bottom:2.5rem}
 .d-list .filepath{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px}
 .d-list .explain{color:var(--faint);font-size:0.78rem;border-top:none;padding-top:0}
 
-/* ── Clean table ────────────────────────────────────────────────── */
+/* ── Noise summary ──────────────────────────────────────────────── */
+.noise-summary{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;cursor:pointer;transition:border-color 0.2s}
+.noise-summary:hover{border-color:var(--border2)}
+.noise-header{display:flex;align-items:center;justify-content:space-between}
+.noise-header h3{font-size:0.95rem;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:0.5rem}
+.noise-header .toggle{color:var(--faint);font-size:0.8rem;transition:transform 0.2s}
+.noise-header .toggle.open{transform:rotate(180deg)}
+.noise-desc{color:var(--faint);font-size:0.82rem;margin-top:0.25rem}
+.noise-list{display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:0.75rem}
+.noise-list.open{display:block}
+.noise-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0.4rem}
+.noise-item{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border-radius:var(--radius-xs);font-size:0.85rem;transition:background 0.15s}
+.noise-item:hover{background:var(--surface2)}
+.noise-item .name{font-weight:600}
+.noise-item .meta{color:var(--faint);font-size:0.75rem}
+
+/* ── Clean grid ─────────────────────────────────────────────────── */
 .clean-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0.5rem}
 .clean-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;transition:border-color 0.2s}
 .clean-card:hover{border-color:var(--border2)}
 .clean-card .name{font-weight:600;font-size:0.88rem}
 .clean-card .meta{color:var(--faint);font-size:0.75rem;text-align:right}
 
-/* ── AI Triage table ────────────────────────────────────────────── */
+/* ── AI Triage ──────────────────────────────────────────────────── */
 .triage-list{display:flex;flex-direction:column;gap:0.4rem}
 .triage-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.85rem 1.1rem;display:grid;grid-template-columns:180px 1fr auto auto;gap:1rem;align-items:center;font-size:0.85rem}
 @media(max-width:768px){.triage-item{grid-template-columns:1fr;gap:0.4rem}}
@@ -139,10 +175,8 @@ section{margin-bottom:2.5rem}
 .how-step h4{font-size:0.85rem;font-weight:700;margin-bottom:0.25rem}
 .how-step p{color:var(--dim);font-size:0.78rem;line-height:1.5}
 
-/* ── Empty ──────────────────────────────────────────────────────── */
+/* ── Empty / Footer ─────────────────────────────────────────────── */
 .empty{text-align:center;padding:3rem;color:var(--dim)}
-
-/* ── Footer ─────────────────────────────────────────────────────── */
 footer{padding:2.5rem 0;border-top:1px solid var(--border);text-align:center}
 footer p{color:var(--faint);font-size:0.8rem}
 footer .links{margin-top:0.5rem;display:flex;justify-content:center;gap:1rem}
@@ -157,7 +191,7 @@ footer .links a:hover{color:var(--accent);text-decoration:none}
 <div class="hero">
   <div class="hero-inner">
     <div class="hero-text">
-      <div class="tagline"><span class="dot"></span> Scanning {{ stats.total_scans }} packages every 6 hours</div>
+      <div class="tagline"><span class="dot" style="background:{% if threats %}var(--red){% else %}var(--green){% endif %}"></span> Scanning {{ stats.total_scans }} packages every 6 hours</div>
       <h1><span class="grad">Vajra</span></h1>
       <p>Zero-trust supply chain drift detection for PyPI. We compare every published artifact against its GitHub source. No signatures needed — just math.</p>
     </div>
@@ -171,6 +205,36 @@ footer .links a:hover{color:var(--accent);text-decoration:none}
     </div>
   </div>
 </div>
+
+<!-- ── Status Banner ─────────────────────────────────────────────── -->
+{% if threats %}
+  {% set crit_threats = threats | selectattr('critical', 'gt', 0) | list %}
+  {% if crit_threats %}
+<div class="banner has-threats">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  <div class="banner-text">
+    <h3>{{ crit_threats|length }} package{{ 's' if crit_threats|length != 1 }} with critical drift</h3>
+    <p>These packages have files on PyPI that differ from GitHub in high-risk ways. Review recommended.</p>
+  </div>
+</div>
+  {% else %}
+<div class="banner warn-only">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  <div class="banner-text">
+    <h3>{{ threats|length }} package{{ 's' if threats|length != 1 }} with minor drift</h3>
+    <p>Non-critical differences detected between PyPI and GitHub. Likely benign but worth a glance.</p>
+  </div>
+</div>
+  {% endif %}
+{% else %}
+<div class="banner all-clear">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <div class="banner-text">
+    <h3>All clear</h3>
+    <p>No targeted supply chain threats detected across {{ stats.total_scans }} scanned packages.{% if noise %} {{ noise|length }} packages have expected packaging differences.{% endif %}</p>
+  </div>
+</div>
+{% endif %}
 
 <!-- ── Stats ─────────────────────────────────────────────────────── -->
 <div class="stats">
@@ -223,24 +287,21 @@ footer .links a:hover{color:var(--accent);text-decoration:none}
   </div>
 </div>
 
-<!-- ── Flagged Packages ──────────────────────────────────────────── -->
-{% if flagged %}
-<section id="sec-flagged">
+<!-- ── Packages Requiring Attention ──────────────────────────────── -->
+{% if threats %}
+<section id="sec-threats">
   <div class="sec-head">
-    <h2>Flagged Packages <span class="count">{{ flagged|length }}</span></h2>
-    <input type="text" class="search" id="flaggedSearch" placeholder="Search packages..." oninput="filterFindings(this.value)">
+    <h2>Packages Requiring Attention <span class="count">{{ threats|length }}</span></h2>
+    <input type="text" class="search" id="threatSearch" placeholder="Search..." oninput="filterFindings(this.value)">
   </div>
   <div class="findings" id="findingsList">
-  {% for s in flagged %}
+  {% for s in threats %}
     <div class="finding" data-name="{{ s.package }}" onclick="toggleFindingDetail('fd-{{ s.id }}')">
       <div class="finding-top">
         <div class="finding-pkg">
           <span class="badge {{ s.verdict|lower }}">{{ s.verdict }}</span>
           <span class="name">{{ s.package }}</span>
           <span class="ver mono">{{ s.version }}</span>
-          {% if s.id in mass_drift_ids %}
-          <span class="badge-drift" title="High file count — likely packaging differences, not an attack">structural mismatch</span>
-          {% endif %}
         </div>
         <div class="finding-stats">
           {% if s.critical > 0 %}<span style="color:var(--red)">{{ s.critical }} critical</span>{% endif %}
@@ -248,6 +309,14 @@ footer .links a:hover{color:var(--accent);text-decoration:none}
           <span>{{ s.timestamp[:10] }}</span>
         </div>
       </div>
+      {% set reasons = reasons_map.get(s.id, []) %}
+      {% if reasons %}
+      <div class="finding-reasons">
+        {% for r in reasons %}
+        <span class="reason-tag{% if s.critical == 0 %} low{% endif %}">{{ r }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
       {% if s.github_repo %}
       <div class="finding-repo"><a href="https://github.com/{{ s.github_repo }}" onclick="event.stopPropagation()">github.com/{{ s.github_repo }}</a></div>
       {% endif %}
@@ -322,10 +391,39 @@ footer .links a:hover{color:var(--accent);text-decoration:none}
 </section>
 {% endif %}
 
+<!-- ── Packaging Differences (noise) ─────────────────────────────── -->
+{% if noise %}
+<section id="sec-noise">
+  <div class="noise-summary" onclick="toggleNoise()">
+    <div class="noise-header">
+      <h3>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--faint)" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Packaging Differences <span class="count">{{ noise|length }}</span>
+      </h3>
+      <span class="toggle" id="noiseToggle">&#9660;</span>
+    </div>
+    <div class="noise-desc">These packages have many files that differ between PyPI and GitHub due to build processes, vendored dependencies, or compiled extensions. This is normal and not indicative of an attack.</div>
+    <div class="noise-list" id="noiseList">
+      <div class="noise-grid">
+      {% for s in noise %}
+        <div class="noise-item">
+          <div>
+            <span class="name">{{ s.package }}</span>
+            <span class="mono" style="color:var(--faint)">{{ s.version }}</span>
+          </div>
+          <span class="meta">{{ s.warnings }} diffs</span>
+        </div>
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <!-- ── Clean Scans ───────────────────────────────────────────────── -->
 <section id="sec-clean">
   <div class="sec-head">
-    <h2>Recent Clean Scans <span class="count">{{ recent_clean|length }}</span></h2>
+    <h2>Verified Clean <span class="count">{{ recent_clean|length }}</span></h2>
     <input type="text" class="search" id="cleanSearch" placeholder="Search..." oninput="filterClean(this.value)">
   </div>
   {% if recent_clean %}
@@ -382,6 +480,12 @@ function filterClean(q) {
   document.querySelectorAll('#cleanGrid .clean-card').forEach(el => {
     el.style.display = el.dataset.name.toLowerCase().includes(q) ? '' : 'none';
   });
+}
+function toggleNoise() {
+  const list = document.getElementById('noiseList');
+  const toggle = document.getElementById('noiseToggle');
+  list.classList.toggle('open');
+  toggle.classList.toggle('open');
 }
 </script>
 </body>

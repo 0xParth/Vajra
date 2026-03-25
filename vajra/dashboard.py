@@ -51,9 +51,40 @@ def generate_dashboard(
         if any(d.get("detail", "").startswith("[mass-drift]") for d in drifts):
             mass_drift_ids.add(sid)
 
+    threats = [s for s in flagged if s["id"] not in mass_drift_ids]
+    noise = [s for s in flagged if s["id"] in mass_drift_ids]
+
+    reasons_map: dict[int, list[str]] = {}
+    for s in flagged:
+        sid = s["id"]
+        drifts = file_drifts_map.get(sid, [])
+        reasons: list[str] = []
+        for d in drifts:
+            if d.get("severity") != "CRITICAL":
+                continue
+            path = d.get("path", "")
+            dtype = d.get("drift_type", "")
+            if dtype == "PYPI_ONLY":
+                reasons.append(f"{path} injected (PyPI-only)")
+            elif dtype == "CONTENT_MISMATCH":
+                reasons.append(f"{path} modified")
+            elif dtype == "NO_GITHUB_TAG":
+                reasons.append("No GitHub tag for this version")
+            else:
+                reasons.append(f"{path} ({dtype})")
+        if not reasons and s.get("critical", 0) == 0:
+            warning_count = len([
+                d for d in drifts
+                if d.get("severity") == "WARNING"
+                and not d.get("detail", "").startswith("[mass-drift]")
+            ])
+            if warning_count:
+                reasons.append(f"{warning_count} files differ from GitHub")
+        reasons_map[sid] = reasons[:5]
+
     _generate_html(
-        out, stats, flagged, triage_entries, recent_clean,
-        file_drifts_map, triage_map, mass_drift_ids,
+        out, stats, threats, noise, triage_entries, recent_clean,
+        file_drifts_map, triage_map, mass_drift_ids, reasons_map,
     )
     _generate_json_feed(out, store)
     _generate_rss_feed(out, stats, flagged)
@@ -65,12 +96,14 @@ def generate_dashboard(
 def _generate_html(
     out: Path,
     stats: dict,
-    flagged: list[dict],
+    threats: list[dict],
+    noise: list[dict],
     triage_entries: list[dict],
     recent_clean: list[dict],
     file_drifts_map: dict[int, list[dict]] | None = None,
     triage_map: dict[int, list[dict]] | None = None,
     mass_drift_ids: set[int] | None = None,
+    reasons_map: dict[int, list[str]] | None = None,
 ) -> None:
     templates_dir = Path(__file__).resolve().parent / "templates"
     env = Environment(loader=FileSystemLoader(str(templates_dir)), autoescape=True)
@@ -79,12 +112,14 @@ def _generate_html(
     html = template.render(
         stats=stats,
         last_scan=stats.get("last_scan"),
-        flagged=flagged,
+        threats=threats,
+        noise=noise,
         triage_entries=triage_entries,
         recent_clean=recent_clean,
         file_drifts_map=file_drifts_map or {},
         triage_map=triage_map or {},
         mass_drift_ids=mass_drift_ids or set(),
+        reasons_map=reasons_map or {},
     )
     (out / "index.html").write_text(html)
 
