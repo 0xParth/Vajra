@@ -6,306 +6,279 @@
 <title>Vajra — Supply Chain Drift Monitor</title>
 <meta name="description" content="Zero-trust source-to-artifact drift detection for PyPI packages.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #06090f; --bg2: #0b1018; --surface: #111827; --surface2: #1a2332;
-  --surface3: #1f2b3d; --border: #1e293b; --border2: #334155;
-  --text: #f1f5f9; --text2: #e2e8f0; --muted: #94a3b8; --dim: #64748b; --faint: #475569;
-  --accent: #38bdf8; --accent2: #818cf8; --accent3: #a78bfa;
-  --teal: #2dd4bf; --teal-bg: rgba(45,212,191,0.08);
-  --green: #4ade80; --green-bg: rgba(74,222,128,0.08); --green-border: rgba(74,222,128,0.2);
-  --yellow: #fbbf24; --yellow-bg: rgba(251,191,36,0.08); --yellow-border: rgba(251,191,36,0.2);
-  --red: #f87171; --red-bg: rgba(248,113,113,0.08); --red-border: rgba(248,113,113,0.2);
-  --purple: #c084fc; --purple-bg: rgba(192,132,252,0.08);
-  --orange: #fb923c; --orange-bg: rgba(251,146,60,0.08);
-  --radius: 12px; --radius-sm: 8px; --radius-xs: 6px;
+  --bg: #04080d; --bg2: #080e16; --surface: #0c1420; --surface2: #111c2c;
+  --surface3: #162236; --border: #172033; --border2: #1e3050;
+  --text: #eaf0f6; --text2: #c8d6e5; --muted: #7e92a8; --dim: #506580; --faint: #3a5068;
+  --cyan: #00e5ff; --cyan-dim: rgba(0,229,255,0.12); --cyan-glow: rgba(0,229,255,0.25);
+  --green: #00e676; --green-bg: rgba(0,230,118,0.07); --green-border: rgba(0,230,118,0.2);
+  --amber: #ffab00; --amber-bg: rgba(255,171,0,0.07); --amber-border: rgba(255,171,0,0.2);
+  --red: #ff5252; --red-bg: rgba(255,82,82,0.07); --red-border: rgba(255,82,82,0.2);
+  --purple: #b388ff; --purple-bg: rgba(179,136,255,0.07);
+  --radius: 10px; --radius-sm: 7px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
-.mono{font-family:'JetBrains Mono',monospace;font-size:0.82em}
-a{color:var(--accent);text-decoration:none}
-a:hover{text-decoration:underline}
-.wrap{max-width:1240px;margin:0 auto;padding:0 1.5rem}
 
-/* ── Hero ───────────────────────────────────────────────────────── */
-.hero{padding:3rem 0 2rem;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-120px;right:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(56,189,248,0.06) 0%,transparent 70%);pointer-events:none}
-.hero::after{content:'';position:absolute;top:40px;left:-60px;width:400px;height:400px;background:radial-gradient(circle,rgba(129,140,248,0.04) 0%,transparent 70%);pointer-events:none}
-.hero-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap}
-.hero-text h1{font-size:2.8rem;font-weight:900;letter-spacing:-0.04em;line-height:1.1;margin-bottom:0.5rem}
-.hero-text h1 .grad{background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero-text p{color:var(--muted);font-size:1.05rem;max-width:520px;margin-bottom:0.75rem}
-.hero-text .tagline{display:inline-flex;align-items:center;gap:0.5rem;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:0.3rem 0.9rem;font-size:0.78rem;color:var(--dim);margin-bottom:1rem}
-.hero-text .tagline .dot{width:6px;height:6px;border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-.hero-meta{text-align:right;color:var(--dim);font-size:0.8rem}
-.hero-meta strong{color:var(--muted)}
-.hero-links{display:flex;gap:0.6rem;margin-top:0.5rem;justify-content:flex-end}
-.hero-links a{display:inline-flex;align-items:center;gap:0.3rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xs);padding:0.35rem 0.75rem;font-size:0.75rem;color:var(--muted);transition:all 0.2s}
-.hero-links a:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
-.hero-links a svg{width:14px;height:14px}
+body{
+  font-family:'DM Sans',system-ui,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(circle at 1px 1px, rgba(0,229,255,0.03) 1px, transparent 0);
+  background-size:32px 32px;
+}
+
+h1,h2,h3,h4{font-family:'Outfit',system-ui,sans-serif}
+.mono{font-family:'JetBrains Mono',monospace;font-size:0.82em}
+a{color:var(--cyan);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1260px;margin:0 auto;padding:0 1.5rem}
+
+/* ── Animations ─────────────────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes glow{0%,100%{box-shadow:0 0 12px var(--cyan-glow)}50%{box-shadow:0 0 24px var(--cyan-glow),0 0 48px rgba(0,229,255,0.08)}}
+@keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+.anim{animation:fadeUp .5s ease both}
+.anim-d1{animation-delay:.05s}.anim-d2{animation-delay:.1s}.anim-d3{animation-delay:.15s}
+.anim-d4{animation-delay:.2s}.anim-d5{animation-delay:.25s}.anim-d6{animation-delay:.3s}
+
+/* ── Nav / Hero ─────────────────────────────────────────────────── */
+.hero{padding:2.5rem 0 1.5rem;position:relative}
+.hero-inner{display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;flex-wrap:wrap}
+.hero-brand{display:flex;align-items:center;gap:1rem}
+.hero-brand .logo{width:40px;height:40px;border-radius:8px;background:var(--cyan-dim);border:1px solid rgba(0,229,255,0.15);display:flex;align-items:center;justify-content:center;animation:glow 3s ease-in-out infinite}
+.hero-brand .logo svg{width:20px;height:20px;stroke:var(--cyan)}
+.hero-brand h1{font-size:1.8rem;font-weight:900;letter-spacing:-0.03em;color:var(--cyan)}
+.hero-sub{color:var(--dim);font-size:0.85rem;margin-top:0.15rem;font-family:'DM Sans',sans-serif;font-weight:400}
+.hero-right{display:flex;align-items:center;gap:1.5rem}
+.hero-scan{display:flex;align-items:center;gap:0.5rem;color:var(--dim);font-size:0.78rem}
+.hero-scan .dot{width:7px;height:7px;border-radius:50%;animation:pulse 2s infinite}
+.hero-links{display:flex;gap:0.4rem}
+.hero-links a{display:inline-flex;align-items:center;gap:0.3rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.35rem 0.7rem;font-size:0.72rem;color:var(--dim);font-weight:500;transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.hero-links a:hover{border-color:var(--cyan);color:var(--cyan);text-decoration:none}
+.hero-links a svg{width:13px;height:13px}
+.hero-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:1rem 0 1.5rem}
 
 /* ── Status Banner ──────────────────────────────────────────────── */
-.banner{border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;gap:1rem}
-.banner svg{width:28px;height:28px;flex-shrink:0}
-.banner-text h3{font-size:1rem;font-weight:700}
-.banner-text p{font-size:0.85rem;margin-top:0.1rem}
+.banner{border-radius:var(--radius);padding:1.1rem 1.4rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;position:relative;overflow:hidden}
+.banner::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,0.02) 0%,transparent 100%);pointer-events:none}
+.banner svg{width:24px;height:24px;flex-shrink:0;position:relative;z-index:1}
+.banner-text{position:relative;z-index:1}
+.banner-text h3{font-size:0.95rem;font-weight:700}
+.banner-text p{font-size:0.8rem;margin-top:0.1rem;color:var(--muted)}
 .banner.all-clear{background:var(--green-bg);border:1px solid var(--green-border)}
-.banner.all-clear svg{stroke:var(--green)}
-.banner.all-clear h3{color:var(--green)}
-.banner.all-clear p{color:var(--muted)}
+.banner.all-clear svg{stroke:var(--green)}.banner.all-clear h3{color:var(--green)}
 .banner.has-threats{background:var(--red-bg);border:1px solid var(--red-border)}
-.banner.has-threats svg{stroke:var(--red)}
-.banner.has-threats h3{color:var(--red)}
-.banner.has-threats p{color:var(--muted)}
-.banner.warn-only{background:var(--yellow-bg);border:1px solid var(--yellow-border)}
-.banner.warn-only svg{stroke:var(--yellow)}
-.banner.warn-only h3{color:var(--yellow)}
-.banner.warn-only p{color:var(--muted)}
+.banner.has-threats svg{stroke:var(--red)}.banner.has-threats h3{color:var(--red)}
+.banner.warn-only{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.banner.warn-only svg{stroke:var(--amber)}.banner.warn-only h3{color:var(--amber)}
 
 /* ── Stats ──────────────────────────────────────────────────────── */
-.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:2rem}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:0.6rem;margin-bottom:2rem}
 @media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1rem;position:relative;overflow:hidden;transition:border-color 0.2s,transform 0.2s}
-.stat:hover{border-color:var(--border2);transform:translateY(-1px)}
-.stat .icon{width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;margin-bottom:0.75rem}
-.stat .icon svg{width:18px;height:18px}
-.stat .num{font-size:2rem;font-weight:800;letter-spacing:-0.03em;line-height:1}
-.stat .label{color:var(--dim);font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-top:0.25rem}
-.stat.s-blue .icon{background:rgba(56,189,248,0.1)}.stat.s-blue .icon svg{stroke:var(--accent)}.stat.s-blue .num{color:var(--accent)}
-.stat.s-green .icon{background:var(--green-bg)}.stat.s-green .icon svg{stroke:var(--green)}.stat.s-green .num{color:var(--green)}
-.stat.s-yellow .icon{background:var(--yellow-bg)}.stat.s-yellow .icon svg{stroke:var(--yellow)}.stat.s-yellow .num{color:var(--yellow)}
-.stat.s-red .icon{background:var(--red-bg)}.stat.s-red .icon svg{stroke:var(--red)}.stat.s-red .num{color:var(--red)}
-.stat.s-purple .icon{background:var(--purple-bg)}.stat.s-purple .icon svg{stroke:var(--purple)}.stat.s-purple .num{color:var(--purple)}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1rem;transition:border-color 0.2s,transform 0.2s}
+.stat:hover{border-color:var(--border2);transform:translateY(-2px)}
+.stat .num{font-family:'Outfit',sans-serif;font-size:2.2rem;font-weight:900;letter-spacing:-0.04em;line-height:1}
+.stat .label{color:var(--dim);font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-top:0.2rem;font-family:'DM Sans',sans-serif}
+.stat.s-cyan .num{color:var(--cyan)}.stat.s-green .num{color:var(--green)}
+.stat.s-amber .num{color:var(--amber)}.stat.s-red .num{color:var(--red)}
+.stat.s-purple .num{color:var(--purple)}
 
-/* ── Section chrome ─────────────────────────────────────────────── */
+/* ── Section ────────────────────────────────────────────────────── */
 section{margin-bottom:2.5rem}
-.sec-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem}
-.sec-head h2{font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:0.5rem}
-.sec-head h2 .count{background:var(--surface2);color:var(--dim);font-size:0.7rem;font-weight:600;padding:0.15rem 0.55rem;border-radius:10px}
-.search{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xs);padding:0.45rem 0.85rem;color:var(--text);font-size:0.82rem;width:240px;outline:none;transition:border-color 0.2s;font-family:inherit}
-.search:focus{border-color:var(--accent)}
+.sec-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem}
+.sec-head h2{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;color:var(--text2)}
+.sec-head h2 .count{background:var(--surface2);color:var(--dim);font-size:0.65rem;font-weight:600;padding:0.15rem 0.5rem;border-radius:10px;font-family:'JetBrains Mono',monospace}
+.search{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.4rem 0.75rem;color:var(--text);font-size:0.8rem;width:220px;outline:none;transition:border-color 0.2s;font-family:'DM Sans',sans-serif}
+.search:focus{border-color:var(--cyan)}
 .search::placeholder{color:var(--faint)}
 
-/* ── Pills ──────────────────────────────────────────────────────── */
-.pills{display:flex;gap:0.35rem}
-.pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:0.3rem 0.8rem;font-size:0.75rem;font-weight:500;color:var(--dim);cursor:pointer;transition:all 0.15s;user-select:none}
-.pill:hover{border-color:var(--border2);color:var(--muted)}
-.pill.active{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
-
 /* ── Badges ─────────────────────────────────────────────────────── */
-.badge{display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
-.badge::before{content:'';width:5px;height:5px;border-radius:50%}
+.badge{display:inline-flex;align-items:center;gap:0.3rem;padding:0.15rem 0.6rem;border-radius:3px;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace}
+.badge::before{content:'';width:4px;height:4px;border-radius:50%}
 .badge.critical{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}.badge.critical::before{background:var(--red)}
-.badge.warn{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border)}.badge.warn::before{background:var(--yellow)}
+.badge.warn{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}.badge.warn::before{background:var(--amber)}
 .badge.clean{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}.badge.clean::before{background:var(--green)}
 .badge.malicious{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}.badge.malicious::before{background:var(--red)}
-.badge.suspicious{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border)}.badge.suspicious::before{background:var(--yellow)}
+.badge.suspicious{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}.badge.suspicious::before{background:var(--amber)}
 .badge.benign{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}.badge.benign::before{background:var(--green)}
 
 /* ── Threat cards ───────────────────────────────────────────────── */
 .findings{display:flex;flex-direction:column;gap:0.5rem}
-.finding{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;transition:border-color 0.2s;cursor:pointer}
-.finding:hover{border-color:var(--border2)}
+.finding{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem;transition:all 0.2s;cursor:pointer;position:relative}
+.finding:hover{border-color:var(--border2);background:var(--surface2)}
 .finding-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-.finding-pkg{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap}
-.finding-pkg .name{font-weight:700;font-size:0.95rem}
-.finding-pkg .ver{color:var(--dim);font-size:0.82rem}
-.finding-stats{display:flex;align-items:center;gap:1.25rem;color:var(--dim);font-size:0.78rem}
-.finding-stats span{display:flex;align-items:center;gap:0.3rem}
-.finding-reasons{margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.35rem}
-.reason-tag{display:inline-flex;align-items:center;gap:0.25rem;background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);border-radius:var(--radius-xs);padding:0.2rem 0.6rem;font-size:0.72rem;font-weight:600}
-.reason-tag.low{background:var(--yellow-bg);border-color:var(--yellow-border);color:var(--yellow)}
-.finding-repo{color:var(--faint);font-size:0.78rem;margin-top:0.3rem}
+.finding-left{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap}
+.finding-left .name{font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem}
+.finding-left .ver{font-family:'JetBrains Mono',monospace;color:var(--faint);font-size:0.78rem}
+.finding-right{display:flex;align-items:center;gap:1rem;color:var(--dim);font-size:0.75rem;font-family:'JetBrains Mono',monospace}
+.finding-right .crit{color:var(--red)}.finding-right .warns{color:var(--amber)}
+.finding-reasons{margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.3rem}
+.reason{display:inline-flex;align-items:center;gap:0.2rem;padding:0.15rem 0.55rem;border-radius:3px;font-size:0.68rem;font-weight:600;font-family:'JetBrains Mono',monospace}
+.reason.high{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.reason.med{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber)}
+.finding-repo{color:var(--faint);font-size:0.75rem;margin-top:0.3rem}
 .finding-repo a{color:var(--dim)}
 
-/* Finding detail */
-.finding-detail{display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
-.finding-detail.open{display:block}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+/* Detail panel */
+.finding-detail{display:none;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border)}
+.finding-detail.open{display:block;animation:fadeUp .3s ease}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem}
 @media(max-width:768px){.detail-grid{grid-template-columns:1fr}}
-.d-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.8rem}
-.d-card h4{font-size:0.68rem;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem}
+.d-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.75rem}
+.d-card h4{font-size:0.62rem;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem;font-family:'Outfit',sans-serif}
 .d-list{list-style:none}
-.d-list li{display:flex;align-items:center;justify-content:space-between;padding:0.3rem 0;font-size:0.82rem;gap:0.5rem}
-.d-list li+li{border-top:1px solid var(--border)}
-.d-list .filepath{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px}
-.d-list .explain{color:var(--faint);font-size:0.78rem;border-top:none;padding-top:0}
+.d-list li{display:flex;align-items:center;justify-content:space-between;padding:0.25rem 0;font-size:0.8rem;gap:0.5rem}
+.d-list li+li{border-top:1px solid rgba(23,32,51,0.8)}
+.d-list .fp{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px;font-family:'JetBrains Mono',monospace;font-size:0.75rem}
+.d-list .explain{color:var(--faint);font-size:0.75rem;border-top:none;padding-top:0}
 
-/* ── Noise summary ──────────────────────────────────────────────── */
-.noise-summary{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;cursor:pointer;transition:border-color 0.2s}
-.noise-summary:hover{border-color:var(--border2)}
-.noise-header{display:flex;align-items:center;justify-content:space-between}
-.noise-header h3{font-size:0.95rem;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:0.5rem}
-.noise-header .toggle{color:var(--faint);font-size:0.8rem;transition:transform 0.2s}
-.noise-header .toggle.open{transform:rotate(180deg)}
-.noise-desc{color:var(--faint);font-size:0.82rem;margin-top:0.25rem}
-.noise-list{display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:0.75rem}
-.noise-list.open{display:block}
-.noise-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0.4rem}
-.noise-item{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border-radius:var(--radius-xs);font-size:0.85rem;transition:background 0.15s}
-.noise-item:hover{background:var(--surface2)}
-.noise-item .name{font-weight:600}
-.noise-item .meta{color:var(--faint);font-size:0.75rem}
+/* ── Noise ──────────────────────────────────────────────────────── */
+.noise-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;cursor:pointer;transition:border-color 0.2s}
+.noise-bar:hover{border-color:var(--border2)}
+.noise-top{display:flex;align-items:center;justify-content:space-between}
+.noise-top h3{font-size:0.9rem;font-weight:700;color:var(--dim);display:flex;align-items:center;gap:0.5rem}
+.noise-top .chevron{color:var(--faint);font-size:0.7rem;transition:transform 0.2s}
+.noise-top .chevron.open{transform:rotate(180deg)}
+.noise-sub{color:var(--faint);font-size:0.78rem;margin-top:0.15rem}
+.noise-body{display:none;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border)}
+.noise-body.open{display:block;animation:fadeUp .3s ease}
+.noise-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0.3rem}
+.noise-chip{display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0.65rem;border-radius:var(--radius-sm);font-size:0.82rem;transition:background 0.15s}
+.noise-chip:hover{background:var(--surface2)}
+.noise-chip .n{font-family:'Outfit',sans-serif;font-weight:600}.noise-chip .m{color:var(--faint);font-size:0.72rem;font-family:'JetBrains Mono',monospace}
+
+/* ── Pills ──────────────────────────────────────────────────────── */
+.pills{display:flex;gap:0.3rem}
+.pill{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:0.25rem 0.7rem;font-size:0.72rem;font-weight:600;color:var(--dim);cursor:pointer;transition:all 0.15s;user-select:none;font-family:'DM Sans',sans-serif}
+.pill:hover{border-color:var(--border2);color:var(--muted)}
+.pill.active{background:var(--cyan-dim);color:var(--cyan);border-color:rgba(0,229,255,0.25);font-weight:700}
+
+/* ── Triage ─────────────────────────────────────────────────────── */
+.triage-list{display:flex;flex-direction:column;gap:0.35rem}
+.triage-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.8rem 1rem;display:grid;grid-template-columns:160px 1fr auto auto;gap:0.75rem;align-items:center;font-size:0.82rem}
+@media(max-width:768px){.triage-item{grid-template-columns:1fr;gap:0.3rem}}
+.triage-item .pkg{font-family:'Outfit',sans-serif;font-weight:600}
+.triage-item .file{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.75rem}
+.triage-item .explain{color:var(--faint);font-size:0.78rem;grid-column:1/-1}
 
 /* ── Clean grid ─────────────────────────────────────────────────── */
-.clean-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0.5rem}
-.clean-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;transition:border-color 0.2s}
+.clean-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0.4rem}
+.clean-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.65rem 0.9rem;display:flex;align-items:center;justify-content:space-between;transition:border-color 0.15s}
 .clean-card:hover{border-color:var(--border2)}
-.clean-card .name{font-weight:600;font-size:0.88rem}
-.clean-card .meta{color:var(--faint);font-size:0.75rem;text-align:right}
+.clean-card .n{font-family:'Outfit',sans-serif;font-weight:600;font-size:0.85rem}
+.clean-card .v{color:var(--faint);font-size:0.72rem;font-family:'JetBrains Mono',monospace}
 
-/* ── AI Triage ──────────────────────────────────────────────────── */
-.triage-list{display:flex;flex-direction:column;gap:0.4rem}
-.triage-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.85rem 1.1rem;display:grid;grid-template-columns:180px 1fr auto auto;gap:1rem;align-items:center;font-size:0.85rem}
-@media(max-width:768px){.triage-item{grid-template-columns:1fr;gap:0.4rem}}
-.triage-item .pkg{font-weight:600}
-.triage-item .file{color:var(--muted)}
-.triage-item .explain{color:var(--faint);font-size:0.8rem;grid-column:1/-1}
-
-/* ── How it works ───────────────────────────────────────────────── */
-.how{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;margin-bottom:2.5rem}
-.how h3{font-size:1rem;font-weight:700;margin-bottom:1rem}
-.how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+/* ── How ────────────────────────────────────────────────────────── */
+.how{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:2rem}
+.how h3{font-size:0.9rem;font-weight:700;margin-bottom:1rem;color:var(--text2)}
+.how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
 @media(max-width:768px){.how-steps{grid-template-columns:1fr}}
 .how-step{text-align:center}
-.how-step .step-num{width:32px;height:32px;border-radius:50%;background:rgba(56,189,248,0.1);color:var(--accent);font-weight:800;font-size:0.85rem;display:inline-flex;align-items:center;justify-content:center;margin-bottom:0.5rem}
-.how-step h4{font-size:0.85rem;font-weight:700;margin-bottom:0.25rem}
-.how-step p{color:var(--dim);font-size:0.78rem;line-height:1.5}
+.how-step .num{width:28px;height:28px;border-radius:50%;background:var(--cyan-dim);border:1px solid rgba(0,229,255,0.15);color:var(--cyan);font-family:'Outfit',sans-serif;font-weight:800;font-size:0.8rem;display:inline-flex;align-items:center;justify-content:center;margin-bottom:0.4rem}
+.how-step h4{font-size:0.82rem;font-weight:700;margin-bottom:0.2rem}
+.how-step p{color:var(--dim);font-size:0.75rem;line-height:1.5}
 
-/* ── Empty / Footer ─────────────────────────────────────────────── */
+/* ── Footer ─────────────────────────────────────────────────────── */
 .empty{text-align:center;padding:3rem;color:var(--dim)}
-footer{padding:2.5rem 0;border-top:1px solid var(--border);text-align:center}
-footer p{color:var(--faint);font-size:0.8rem}
-footer .links{margin-top:0.5rem;display:flex;justify-content:center;gap:1rem}
-footer .links a{color:var(--dim);font-size:0.78rem;transition:color 0.2s}
-footer .links a:hover{color:var(--accent);text-decoration:none}
+footer{padding:2rem 0;border-top:1px solid var(--border);text-align:center}
+footer p{color:var(--faint);font-size:0.75rem;font-family:'DM Sans',sans-serif}
+footer .flinks{margin-top:0.4rem;display:flex;justify-content:center;gap:1rem}
+footer .flinks a{color:var(--dim);font-size:0.72rem;transition:color 0.15s;font-family:'DM Sans',sans-serif}
+footer .flinks a:hover{color:var(--cyan);text-decoration:none}
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <!-- ── Hero ──────────────────────────────────────────────────────── -->
-<div class="hero">
+<div class="hero anim">
   <div class="hero-inner">
-    <div class="hero-text">
-      <div class="tagline"><span class="dot" style="background:{% if threats %}var(--red){% else %}var(--green){% endif %}"></span> Scanning {{ stats.total_scans }} packages every 6 hours</div>
-      <h1><span class="grad">Vajra</span></h1>
-      <p>Zero-trust supply chain drift detection for PyPI. We compare every published artifact against its GitHub source. No signatures needed — just math.</p>
+    <div>
+      <div class="hero-brand">
+        <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <div>
+          <h1>Vajra</h1>
+          <div class="hero-sub">Supply-chain drift monitor for PyPI</div>
+        </div>
+      </div>
     </div>
-    <div class="hero-meta">
-      <div>Last scan<br><strong>{{ last_scan[:16] if last_scan else "never" }}</strong></div>
+    <div class="hero-right">
+      <div class="hero-scan">
+        <span class="dot" style="background:{% if threats %}var(--red){% else %}var(--green){% endif %}"></span>
+        <span>{{ stats.total_scans }} packages &middot; last scan {{ last_scan[:16] if last_scan else "never" }}</span>
+      </div>
       <div class="hero-links">
         <a href="feed.json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg> JSON</a>
         <a href="feed.xml"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg> RSS</a>
-        <a href="https://github.com/0xParth/Vajra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg> GitHub</a>
+        <a href="https://github.com/0xParth/Vajra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg> Source</a>
       </div>
     </div>
   </div>
+  <div class="hero-divider"></div>
 </div>
 
 <!-- ── Status Banner ─────────────────────────────────────────────── -->
 {% if threats %}
   {% set crit_threats = threats | selectattr('critical', 'gt', 0) | list %}
   {% if crit_threats %}
-<div class="banner has-threats">
+<div class="banner has-threats anim anim-d1">
   <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
   <div class="banner-text">
     <h3>{{ crit_threats|length }} package{{ 's' if crit_threats|length != 1 }} with critical drift</h3>
-    <p>These packages have files on PyPI that differ from GitHub in high-risk ways. Review recommended.</p>
+    <p>Files on PyPI differ from GitHub in high-risk ways. Review recommended.</p>
   </div>
 </div>
   {% else %}
-<div class="banner warn-only">
+<div class="banner warn-only anim anim-d1">
   <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
   <div class="banner-text">
     <h3>{{ threats|length }} package{{ 's' if threats|length != 1 }} with minor drift</h3>
-    <p>Non-critical differences detected between PyPI and GitHub. Likely benign but worth a glance.</p>
+    <p>Non-critical differences detected. Likely benign but worth a glance.</p>
   </div>
 </div>
   {% endif %}
 {% else %}
-<div class="banner all-clear">
+<div class="banner all-clear anim anim-d1">
   <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
   <div class="banner-text">
     <h3>All clear</h3>
-    <p>No targeted supply chain threats detected across {{ stats.total_scans }} scanned packages.{% if noise %} {{ noise|length }} packages have expected packaging differences.{% endif %}</p>
+    <p>No targeted supply chain threats detected across {{ stats.total_scans }} packages.{% if noise %} {{ noise|length }} have expected packaging differences.{% endif %}</p>
   </div>
 </div>
 {% endif %}
 
 <!-- ── Stats ─────────────────────────────────────────────────────── -->
 <div class="stats">
-  <div class="stat s-blue">
-    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
-    <div class="num">{{ stats.total_scans }}</div>
-    <div class="label">Packages Scanned</div>
-  </div>
-  <div class="stat s-green">
-    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-    <div class="num">{{ stats.clean }}</div>
-    <div class="label">Clean</div>
-  </div>
-  <div class="stat s-yellow">
-    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-    <div class="num">{{ stats.warnings }}</div>
-    <div class="label">Warnings</div>
-  </div>
-  <div class="stat s-red">
-    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
-    <div class="num">{{ stats.critical }}</div>
-    <div class="label">Critical Drift</div>
-  </div>
-  <div class="stat s-purple">
-    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/></svg></div>
-    <div class="num">{{ stats.confirmed_threats }}</div>
-    <div class="label">AI Confirmed</div>
-  </div>
+  <div class="stat s-cyan anim anim-d1"><div class="num">{{ stats.total_scans }}</div><div class="label">Scanned</div></div>
+  <div class="stat s-green anim anim-d2"><div class="num">{{ stats.clean }}</div><div class="label">Clean</div></div>
+  <div class="stat s-amber anim anim-d3"><div class="num">{{ stats.warnings }}</div><div class="label">Warnings</div></div>
+  <div class="stat s-red anim anim-d4"><div class="num">{{ stats.critical }}</div><div class="label">Critical</div></div>
+  <div class="stat s-purple anim anim-d5"><div class="num">{{ stats.confirmed_threats }}</div><div class="label">AI Confirmed</div></div>
 </div>
 
-<!-- ── How It Works ──────────────────────────────────────────────── -->
-<div class="how">
-  <h3>How Vajra Detects Supply Chain Attacks</h3>
-  <div class="how-steps">
-    <div class="how-step">
-      <div class="step-num">1</div>
-      <h4>Download Both Sources</h4>
-      <p>Fetch the .tar.gz from PyPI and the tagged source from GitHub for the same version.</p>
-    </div>
-    <div class="how-step">
-      <div class="step-num">2</div>
-      <h4>Compare SHA-256 Hashes</h4>
-      <p>Every file is hashed. Mismatches, extra files, or missing tags are flagged instantly.</p>
-    </div>
-    <div class="how-step">
-      <div class="step-num">3</div>
-      <h4>AI Triage (Optional)</h4>
-      <p>Flagged diffs are analyzed by Claude to classify threats: malicious, suspicious, or benign.</p>
-    </div>
-  </div>
-</div>
-
-<!-- ── Packages Requiring Attention ──────────────────────────────── -->
+<!-- ── Threats ───────────────────────────────────────────────────── -->
 {% if threats %}
-<section id="sec-threats">
+<section id="sec-threats" class="anim anim-d3">
   <div class="sec-head">
-    <h2>Packages Requiring Attention <span class="count">{{ threats|length }}</span></h2>
-    <input type="text" class="search" id="threatSearch" placeholder="Search..." oninput="filterFindings(this.value)">
+    <h2>Requires Attention <span class="count">{{ threats|length }}</span></h2>
+    <input type="text" class="search" id="threatSearch" placeholder="Filter..." oninput="filterFindings(this.value)">
   </div>
   <div class="findings" id="findingsList">
   {% for s in threats %}
-    <div class="finding" data-name="{{ s.package }}" onclick="toggleFindingDetail('fd-{{ s.id }}')">
+    <div class="finding" data-name="{{ s.package }}" onclick="toggleDetail('fd-{{ s.id }}')">
       <div class="finding-top">
-        <div class="finding-pkg">
+        <div class="finding-left">
           <span class="badge {{ s.verdict|lower }}">{{ s.verdict }}</span>
           <span class="name">{{ s.package }}</span>
-          <span class="ver mono">{{ s.version }}</span>
+          <span class="ver">{{ s.version }}</span>
         </div>
-        <div class="finding-stats">
-          {% if s.critical > 0 %}<span style="color:var(--red)">{{ s.critical }} critical</span>{% endif %}
-          {% if s.warnings > 0 %}<span style="color:var(--yellow)">{{ s.warnings }} warnings</span>{% endif %}
+        <div class="finding-right">
+          {% if s.critical > 0 %}<span class="crit">{{ s.critical }} crit</span>{% endif %}
+          {% if s.warnings > 0 %}<span class="warns">{{ s.warnings }} warn</span>{% endif %}
           <span>{{ s.timestamp[:10] }}</span>
         </div>
       </div>
@@ -313,12 +286,12 @@ footer .links a:hover{color:var(--accent);text-decoration:none}
       {% if reasons %}
       <div class="finding-reasons">
         {% for r in reasons %}
-        <span class="reason-tag{% if s.critical == 0 %} low{% endif %}">{{ r }}</span>
+        <span class="reason{% if s.critical > 0 %} high{% else %} med{% endif %}">{{ r }}</span>
         {% endfor %}
       </div>
       {% endif %}
       {% if s.github_repo %}
-      <div class="finding-repo"><a href="https://github.com/{{ s.github_repo }}" onclick="event.stopPropagation()">github.com/{{ s.github_repo }}</a></div>
+      <div class="finding-repo"><a href="https://github.com/{{ s.github_repo }}" onclick="event.stopPropagation()">{{ s.github_repo }}</a></div>
       {% endif %}
       <div class="finding-detail" id="fd-{{ s.id }}">
         {% set drifts = file_drifts_map.get(s.id, []) %}
@@ -328,15 +301,13 @@ footer .links a:hover{color:var(--accent);text-decoration:none}
           <div class="d-card">
             <h4>File Drifts ({{ drifts|length }})</h4>
             <ul class="d-list">
-            {% for d in drifts[:20] %}
+            {% for d in drifts[:15] %}
               <li>
-                <span class="filepath mono">{{ d.path }}</span>
+                <span class="fp">{{ d.path }}</span>
                 <span class="badge {{ 'critical' if d.severity == 'CRITICAL' else ('warn' if d.severity == 'WARNING' else 'clean') }}">{{ d.drift_type }}</span>
               </li>
             {% endfor %}
-            {% if drifts|length > 20 %}
-              <li class="explain">... and {{ drifts|length - 20 }} more files</li>
-            {% endif %}
+            {% if drifts|length > 15 %}<li class="explain">+ {{ drifts|length - 15 }} more</li>{% endif %}
             </ul>
           </div>
           {% endif %}
@@ -345,17 +316,14 @@ footer .links a:hover{color:var(--accent);text-decoration:none}
             <h4>AI Triage</h4>
             <ul class="d-list">
             {% for t in triages %}
-              <li>
-                <span class="filepath mono">{{ t.file_path }}</span>
-                <span class="badge {{ t.ai_verdict }}">{{ t.ai_verdict }} {{ t.confidence }}%</span>
-              </li>
+              <li><span class="fp">{{ t.file_path }}</span><span class="badge {{ t.ai_verdict }}">{{ t.ai_verdict }} {{ t.confidence }}%</span></li>
               <li class="explain">{{ t.explanation }}</li>
             {% endfor %}
             </ul>
           </div>
           {% endif %}
           {% if not drifts and not triages %}
-          <div class="d-card"><h4>Details</h4><p style="color:var(--faint);font-size:0.82rem">No detailed data stored.</p></div>
+          <div class="d-card"><h4>Details</h4><p style="color:var(--faint);font-size:0.8rem">No data stored.</p></div>
           {% endif %}
         </div>
       </div>
@@ -365,11 +333,11 @@ footer .links a:hover{color:var(--accent);text-decoration:none}
 </section>
 {% endif %}
 
-<!-- ── AI Triage Results ─────────────────────────────────────────── -->
+<!-- ── AI Triage ─────────────────────────────────────────────────── -->
 {% if triage_entries %}
-<section id="sec-triage">
+<section id="sec-triage" class="anim anim-d4">
   <div class="sec-head">
-    <h2>AI Triage Results <span class="count">{{ triage_entries|length }}</span></h2>
+    <h2>AI Triage <span class="count">{{ triage_entries|length }}</span></h2>
     <div class="pills">
       <span class="pill active" role="button" tabindex="0" onclick="filterTriage('all',this)" onkeydown="if(event.key==='Enter')this.click()">All</span>
       <span class="pill" role="button" tabindex="0" onclick="filterTriage('malicious',this)" onkeydown="if(event.key==='Enter')this.click()">Malicious</span>
@@ -380,10 +348,10 @@ footer .links a:hover{color:var(--accent);text-decoration:none}
   <div class="triage-list" id="triageList">
   {% for entry in triage_entries %}
     <div class="triage-item" data-verdict="{{ entry.ai_verdict }}">
-      <div class="pkg mono">{{ entry.package }}</div>
-      <div class="file mono">{{ entry.file_path }}</div>
+      <div class="pkg">{{ entry.package }}</div>
+      <div class="file">{{ entry.file_path }}</div>
       <span class="badge {{ entry.ai_verdict }}">{{ entry.ai_verdict }}</span>
-      <span style="color:var(--dim);font-size:0.8rem">{{ entry.confidence }}%</span>
+      <span style="color:var(--dim);font-size:0.75rem;font-family:'JetBrains Mono',monospace">{{ entry.confidence }}%</span>
       <div class="explain">{{ entry.explanation }}</div>
     </div>
   {% endfor %}
@@ -391,28 +359,19 @@ footer .links a:hover{color:var(--accent);text-decoration:none}
 </section>
 {% endif %}
 
-<!-- ── Packaging Differences (noise) ─────────────────────────────── -->
+<!-- ── Packaging Noise ───────────────────────────────────────────── -->
 {% if noise %}
-<section id="sec-noise">
-  <div class="noise-summary" onclick="toggleNoise()">
-    <div class="noise-header">
-      <h3>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--faint)" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-        Packaging Differences <span class="count">{{ noise|length }}</span>
-      </h3>
-      <span class="toggle" id="noiseToggle">&#9660;</span>
+<section id="sec-noise" class="anim anim-d5">
+  <div class="noise-bar" onclick="toggleNoise()">
+    <div class="noise-top">
+      <h3>Packaging Differences <span class="count">{{ noise|length }}</span></h3>
+      <span class="chevron" id="noiseChev">&#9660;</span>
     </div>
-    <div class="noise-desc">These packages have many files that differ between PyPI and GitHub due to build processes, vendored dependencies, or compiled extensions. This is normal and not indicative of an attack.</div>
-    <div class="noise-list" id="noiseList">
+    <div class="noise-sub">Build artifacts, vendored deps, compiled extensions — expected and not indicative of an attack.</div>
+    <div class="noise-body" id="noiseBody">
       <div class="noise-grid">
       {% for s in noise %}
-        <div class="noise-item">
-          <div>
-            <span class="name">{{ s.package }}</span>
-            <span class="mono" style="color:var(--faint)">{{ s.version }}</span>
-          </div>
-          <span class="meta">{{ s.warnings }} diffs</span>
-        </div>
+        <div class="noise-chip"><span class="n">{{ s.package }} <span class="m">{{ s.version }}</span></span><span class="m">{{ s.warnings }} diffs</span></div>
       {% endfor %}
       </div>
     </div>
@@ -420,73 +379,67 @@ footer .links a:hover{color:var(--accent);text-decoration:none}
 </section>
 {% endif %}
 
-<!-- ── Clean Scans ───────────────────────────────────────────────── -->
-<section id="sec-clean">
+<!-- ── How It Works ──────────────────────────────────────────────── -->
+<div class="how anim anim-d5">
+  <h3>How Detection Works</h3>
+  <div class="how-steps">
+    <div class="how-step">
+      <div class="num">1</div>
+      <h4>Fetch Both Sources</h4>
+      <p>Download the .tar.gz from PyPI and the tagged source from GitHub for the same version.</p>
+    </div>
+    <div class="how-step">
+      <div class="num">2</div>
+      <h4>SHA-256 Compare</h4>
+      <p>Every file is hashed. Mismatches, extra files, or missing tags are flagged instantly.</p>
+    </div>
+    <div class="how-step">
+      <div class="num">3</div>
+      <h4>AI Triage</h4>
+      <p>Flagged diffs are analyzed by Claude to classify: malicious, suspicious, or benign.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Clean ─────────────────────────────────────────────────────── -->
+<section id="sec-clean" class="anim anim-d6">
   <div class="sec-head">
     <h2>Verified Clean <span class="count">{{ recent_clean|length }}</span></h2>
-    <input type="text" class="search" id="cleanSearch" placeholder="Search..." oninput="filterClean(this.value)">
+    <input type="text" class="search" id="cleanSearch" placeholder="Filter..." oninput="filterClean(this.value)">
   </div>
   {% if recent_clean %}
   <div class="clean-grid" id="cleanGrid">
   {% for s in recent_clean[:40] %}
     <div class="clean-card" data-name="{{ s.package }}">
-      <div>
-        <div class="name">{{ s.package }}</div>
-        <div style="color:var(--faint);font-size:0.75rem">{{ s.version }} &middot; {{ s.pypi_files }} files</div>
-      </div>
+      <div><div class="n">{{ s.package }}</div><div class="v">{{ s.version }} &middot; {{ s.pypi_files }} files</div></div>
       <span class="badge clean">Clean</span>
     </div>
   {% endfor %}
   </div>
   {% else %}
-  <div class="empty"><p>No clean scans yet. Run <code>vajra watch</code> to start.</p></div>
+  <div class="empty"><p>No clean scans yet.</p></div>
   {% endif %}
 </section>
 
 </div>
 
-<!-- ── Footer ────────────────────────────────────────────────────── -->
 <footer>
   <div class="wrap">
-    <p>Vajra — Zero-trust source-to-artifact drift detection. No signatures, just math.</p>
-    <div class="links">
-      <a href="feed.json">JSON Feed</a>
-      <a href="feed.xml">RSS Feed</a>
+    <p>Vajra — Zero-trust drift detection. No signatures, just math.</p>
+    <div class="flinks">
+      <a href="feed.json">JSON</a>
+      <a href="feed.xml">RSS</a>
       <a href="https://github.com/0xParth/Vajra">GitHub</a>
     </div>
   </div>
 </footer>
 
 <script>
-function filterFindings(q) {
-  q = q.toLowerCase();
-  document.querySelectorAll('#findingsList .finding').forEach(el => {
-    el.style.display = el.dataset.name.toLowerCase().includes(q) ? '' : 'none';
-  });
-}
-function toggleFindingDetail(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.toggle('open');
-}
-function filterTriage(verdict, pill) {
-  document.querySelectorAll('#sec-triage .pill').forEach(p => p.classList.remove('active'));
-  pill.classList.add('active');
-  document.querySelectorAll('#triageList .triage-item').forEach(el => {
-    el.style.display = (verdict === 'all' || el.dataset.verdict === verdict) ? '' : 'none';
-  });
-}
-function filterClean(q) {
-  q = q.toLowerCase();
-  document.querySelectorAll('#cleanGrid .clean-card').forEach(el => {
-    el.style.display = el.dataset.name.toLowerCase().includes(q) ? '' : 'none';
-  });
-}
-function toggleNoise() {
-  const list = document.getElementById('noiseList');
-  const toggle = document.getElementById('noiseToggle');
-  list.classList.toggle('open');
-  toggle.classList.toggle('open');
-}
+function filterFindings(q){q=q.toLowerCase();document.querySelectorAll('#findingsList .finding').forEach(e=>{e.style.display=e.dataset.name.toLowerCase().includes(q)?'':'none'})}
+function toggleDetail(id){const e=document.getElementById(id);if(e)e.classList.toggle('open')}
+function filterTriage(v,p){document.querySelectorAll('#sec-triage .pill').forEach(e=>e.classList.remove('active'));p.classList.add('active');document.querySelectorAll('#triageList .triage-item').forEach(e=>{e.style.display=(v==='all'||e.dataset.verdict===v)?'':'none'})}
+function filterClean(q){q=q.toLowerCase();document.querySelectorAll('#cleanGrid .clean-card').forEach(e=>{e.style.display=e.dataset.name.toLowerCase().includes(q)?'':'none'})}
+function toggleNoise(){document.getElementById('noiseBody').classList.toggle('open');document.getElementById('noiseChev').classList.toggle('open')}
 </script>
 </body>
 </html>
