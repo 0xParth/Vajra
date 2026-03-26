@@ -72,8 +72,6 @@ a:hover{text-decoration:underline}
 .banner.all-clear svg{stroke:var(--green)}.banner.all-clear h3{color:var(--green)}
 .banner.has-threats{background:var(--red-bg);border:1px solid var(--red-border)}
 .banner.has-threats svg{stroke:var(--red)}.banner.has-threats h3{color:var(--red)}
-.banner.warn-only{background:var(--amber-bg);border:1px solid var(--amber-border)}
-.banner.warn-only svg{stroke:var(--amber)}.banner.warn-only h3{color:var(--amber)}
 
 /* ── Stats ──────────────────────────────────────────────────────── */
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:0.6rem;margin-bottom:2rem}
@@ -223,24 +221,13 @@ footer .flinks a:hover{color:var(--cyan);text-decoration:none}
 
 <!-- ── Status Banner ─────────────────────────────────────────────── -->
 {% if threats %}
-  {% set crit_threats = threats | selectattr('critical', 'gt', 0) | list %}
-  {% if crit_threats %}
 <div class="banner has-threats anim anim-d1">
   <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
   <div class="banner-text">
-    <h3>{{ crit_threats|length }} package{{ 's' if crit_threats|length != 1 }} with critical drift</h3>
-    <p>Files on PyPI differ from GitHub in high-risk ways. Review recommended.</p>
+    <h3>{{ threats|length }} package{{ 's' if threats|length != 1 }} with critical drift</h3>
+    <p>High-risk files on PyPI differ from GitHub. Investigate immediately.</p>
   </div>
 </div>
-  {% else %}
-<div class="banner warn-only anim anim-d1">
-  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-  <div class="banner-text">
-    <h3>{{ threats|length }} package{{ 's' if threats|length != 1 }} with minor drift</h3>
-    <p>Non-critical differences detected. Likely benign but worth a glance.</p>
-  </div>
-</div>
-  {% endif %}
 {% else %}
 <div class="banner all-clear anim anim-d1">
   <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -252,12 +239,11 @@ footer .flinks a:hover{color:var(--cyan);text-decoration:none}
 {% endif %}
 
 <!-- ── Stats ─────────────────────────────────────────────────────── -->
-<div class="stats">
+<div class="stats" style="grid-template-columns:repeat(4,1fr)">
   <div class="stat s-cyan anim anim-d1"><div class="num">{{ stats.total_scans }}</div><div class="label">Scanned</div></div>
   <div class="stat s-green anim anim-d2"><div class="num">{{ stats.clean }}</div><div class="label">Clean</div></div>
-  <div class="stat s-amber anim anim-d3"><div class="num">{{ stats.warnings }}</div><div class="label">Warnings</div></div>
-  <div class="stat s-red anim anim-d4"><div class="num">{{ stats.critical }}</div><div class="label">Critical</div></div>
-  <div class="stat s-purple anim anim-d5"><div class="num">{{ stats.confirmed_threats }}</div><div class="label">AI Confirmed</div></div>
+  <div class="stat s-red anim anim-d3"><div class="num">{{ stats.critical }}</div><div class="label">Critical</div></div>
+  <div class="stat s-purple anim anim-d4"><div class="num">{{ stats.confirmed_threats }}</div><div class="label">AI Confirmed</div></div>
 </div>
 
 <!-- ── Threats ───────────────────────────────────────────────────── -->
@@ -367,7 +353,7 @@ footer .flinks a:hover{color:var(--cyan);text-decoration:none}
       <h3>Packaging Differences <span class="count">{{ noise|length }}</span></h3>
       <span class="chevron" id="noiseChev">&#9660;</span>
     </div>
-    <div class="noise-sub">Build artifacts, vendored deps, compiled extensions — expected and not indicative of an attack.</div>
+    <div class="noise-sub">Minor diffs, build artifacts, vendored deps, compiled extensions — expected and not indicative of an attack.</div>
     <div class="noise-body" id="noiseBody">
       <div class="noise-grid">
       {% for s in noise %}
