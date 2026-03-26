@@ -74,7 +74,7 @@ Vajra handles this with a **mass drift heuristic**:
 - **Always-critical files are never downgraded**: `.pth`, `.so`, `.dll`, `setup.py` stay CRITICAL regardless, because these are the highest-risk injection vectors
 - Mass drift packages **skip AI triage** entirely — no point spending tokens analyzing 5,000 build artifacts
 
-This keeps the signal-to-noise ratio high: a real attack will still light up red, even inside a package with heavy build noise.
+This keeps the signal-to-noise ratio high: a real attack will still light up red, even inside a package with heavy build noise. On the dashboard, mass drift packages and warnings-only packages are collapsed into a single "Packaging Differences" section — only critical findings surface in the main view.
 
 ## Installation
 
@@ -151,17 +151,28 @@ vajra dashboard [--output DIR]
 ```
 
 Generates:
-- `index.html` — visual dashboard with stats, flagged packages, AI triage results
-- `feed.json` — machine-readable JSON feed
-- `feed.xml` — RSS feed
+- `index.html` — threat intelligence dashboard (critical findings up top, noise collapsed)
+- `feed.json` — machine-readable JSON feed for integration with other tools
+- `feed.xml` — RSS feed for subscribers
+
+## What the Dashboard Shows
+
+The [live dashboard](https://0xparth.github.io/Vajra/) is designed to answer one question: **"Should I be worried?"**
+
+- **Status banner** — green "All clear" or red "N packages with critical drift"
+- **Requires Attention** — only packages with CRITICAL findings (`.pth` injected, `setup.py` modified, missing GitHub tags). These are real signals worth investigating.
+- **Packaging Differences** — everything else (mass drift, minor content mismatches, build artifacts) collapsed into a single summary. Normal and not indicative of an attack.
+- **Verified Clean** — packages where PyPI matches GitHub exactly. SHA-256 confirmed.
+
+Only critical findings surface. No warning noise.
 
 ## Severity Levels
 
 | Severity | Meaning | Example |
 |----------|---------|---------|
-| **CRITICAL** | High-risk injection vector — file exists on PyPI but not GitHub, or a known dangerous file type was modified | `.pth` file injected, `setup.py` modified, `.so`/`.dll` added |
-| **WARNING** | Drift detected but lower risk — content mismatch or unexpected files | `__init__.py` content differs, extra `.py` files on PyPI |
-| **INFO** | Expected packaging difference — safe to ignore | `PKG-INFO`, `.egg-info`, vendored dependencies |
+| **CRITICAL** | High-risk injection vector — file exists on PyPI but not GitHub, or a known dangerous file type was modified. **Surfaced on dashboard.** | `.pth` file injected, `setup.py` modified, `.so`/`.dll` added |
+| **WARNING** | Drift detected but lower risk — content mismatch or unexpected files. Collapsed into "Packaging Differences." | `__init__.py` content differs, extra `.py` files on PyPI |
+| **INFO** | Expected packaging difference — auto-dismissed | `PKG-INFO`, `.egg-info`, vendored dependencies |
 | **OK** | SHA-256 match — file is identical on both PyPI and GitHub | Clean files |
 
 ## AI Triage Verdicts
